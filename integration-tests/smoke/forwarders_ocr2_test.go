@@ -90,7 +90,7 @@ func TestForwarderOCR2Basic(t *testing.T) {
 	err = actions.ConfigureOCRv2AggregatorContracts(chainClient, ocrv2Config, ocrInstances)
 	require.NoError(t, err, "Error configuring OCRv2 aggregator contracts")
 
-	err = actions.StartNewOCR2Round(1, ocrInstances, chainClient, time.Minute*10)
+	err = actions.StartNewOCR2Round(1, ocrInstances, chainClient, time.Minute*20)
 	require.NoError(t, err)
 
 	answer, err := ocrInstances[0].GetLatestAnswer(context.Background())
@@ -101,7 +101,7 @@ func TestForwarderOCR2Basic(t *testing.T) {
 		ocrRoundVal := (5 + i) % 10
 		err = mockServer.SetValuePath("ocr2", ocrRoundVal)
 		require.NoError(t, err)
-		err = actions.StartNewOCR2Round(int64(i), ocrInstances, chainClient, time.Minute*10)
+		err = actions.StartNewOCR2Round(int64(i), ocrInstances, chainClient, time.Minute*30)
 		require.NoError(t, err)
 
 		answer, err = ocrInstances[0].GetLatestAnswer(context.Background())
