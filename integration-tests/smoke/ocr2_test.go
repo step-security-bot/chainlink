@@ -121,7 +121,7 @@ func setupOCR2Test(t *testing.T, forwardersEnabled bool) (
 		toml = client.AddNetworksConfig(config.BaseOCR2Config, testNetwork)
 	}
 
-	chainlinkChart, err := chainlink.NewDeployment(6, map[string]interface{}{
+	chainlinkChart, err := chainlink.NewDeployment(10, map[string]interface{}{
 		"toml": toml,
 	})
 	require.NoError(t, err, "Error creating chainlink deployment")
