@@ -129,7 +129,7 @@ func setupOCR2Test(t *testing.T, forwardersEnabled bool) (
 	testEnvironment = environment.New(&environment.Config{
 		NamespacePrefix: fmt.Sprintf("smoke-ocr2-%s", strings.ReplaceAll(strings.ToLower(testNetwork.Name), " ", "-")),
 		Test:            t,
-		TTL:             60 * time.Minute,
+		TTL:             24 * time.Hour,
 	}).
 		AddHelm(mockservercfg.New(nil)).
 		AddHelm(mockserver.New(nil)).
