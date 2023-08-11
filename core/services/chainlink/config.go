@@ -125,32 +125,36 @@ type Secrets struct {
 }
 
 func (s *Secrets) SetFrom(f *Secrets) (err error) {
-	if err1 := s.Database.SetFrom(&f.Database); err1 != nil {
-		err = multierr.Append(err, config.NamedMultiErrorList(err1, "Database"))
+	if err2 := s.Database.SetFrom(&f.Database); err2 != nil {
+		err = multierr.Append(err, config.NamedMultiErrorList(err2, "Database"))
 	}
 
 	if err2 := s.Explorer.SetFrom(&f.Explorer); err2 != nil {
 		err = multierr.Append(err, config.NamedMultiErrorList(err2, "Explorer"))
 	}
 
-	if err3 := s.Password.SetFrom(&f.Password); err3 != nil {
-		err = multierr.Append(err, config.NamedMultiErrorList(err3, "Password"))
+	if err2 := s.Password.SetFrom(&f.Password); err2 != nil {
+		err = multierr.Append(err, config.NamedMultiErrorList(err2, "Password"))
 	}
 
-	if err4 := s.Pyroscope.SetFrom(&f.Pyroscope); err4 != nil {
-		err = multierr.Append(err, config.NamedMultiErrorList(err4, "Pyroscope"))
+	if err2 := s.WebServer.SetFrom(&f.WebServer); err2 != nil {
+		err = multierr.Append(err, config.NamedMultiErrorList(err2, "WebServer"))
 	}
 
-	if err5 := s.Prometheus.SetFrom(&f.Prometheus); err5 != nil {
-		err = multierr.Append(err, config.NamedMultiErrorList(err5, "Prometheus"))
+	if err2 := s.Pyroscope.SetFrom(&f.Pyroscope); err2 != nil {
+		err = multierr.Append(err, config.NamedMultiErrorList(err2, "Pyroscope"))
 	}
 
-	if err6 := s.Mercury.SetFrom(&f.Mercury); err6 != nil {
-		err = multierr.Append(err, config.NamedMultiErrorList(err6, "Mercury"))
+	if err2 := s.Prometheus.SetFrom(&f.Prometheus); err2 != nil {
+		err = multierr.Append(err, config.NamedMultiErrorList(err2, "Prometheus"))
 	}
 
-	if err7 := s.Threshold.SetFrom(&f.Threshold); err7 != nil {
-		err = multierr.Append(err, config.NamedMultiErrorList(err7, "Threshold"))
+	if err2 := s.Mercury.SetFrom(&f.Mercury); err2 != nil {
+		err = multierr.Append(err, config.NamedMultiErrorList(err2, "Mercury"))
+	}
+
+	if err2 := s.Threshold.SetFrom(&f.Threshold); err2 != nil {
+		err = multierr.Append(err, config.NamedMultiErrorList(err2, "Threshold"))
 	}
 
 	_, err = utils.MultiErrorList(err)
