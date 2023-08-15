@@ -187,7 +187,7 @@ func TestUserController_UpdateRole(t *testing.T) {
 
 	client := app.NewHTTPClient(cltest.APIEmailAdmin)
 	user := cltest.MustRandomUser(t)
-	err := app.SessionORM().CreateUser(&user)
+	err := app.AuthenticationProvider().CreateUser(&user)
 	require.NoError(t, err)
 
 	testCases := []struct {
@@ -234,7 +234,7 @@ func TestUserController_DeleteUser(t *testing.T) {
 
 	client := app.NewHTTPClient(cltest.APIEmailAdmin)
 	user := cltest.MustRandomUser(t)
-	err := app.SessionORM().CreateUser(&user)
+	err := app.AuthenticationProvider().CreateUser(&user)
 	require.NoError(t, err)
 
 	resp, cleanup := client.Delete(fmt.Sprintf("/v2/users/%s", url.QueryEscape(user.Email)))

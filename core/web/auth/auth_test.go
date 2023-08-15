@@ -32,7 +32,7 @@ func authSuccess(*gin.Context, webauth.Authenticator) error {
 }
 
 type userFindFailer struct {
-	sessions.UserManager
+	sessions.AuthenticationProvider
 	err error
 }
 
@@ -45,7 +45,7 @@ func (u userFindFailer) FindUserByAPIToken(token string) (sessions.User, error) 
 }
 
 type userFindSuccesser struct {
-	sessions.UserManager
+	sessions.AuthenticationProvider
 	user sessions.User
 }
 
@@ -345,7 +345,7 @@ func TestRBAC_Routemap_Edit(t *testing.T) {
 
 	// Create a test edit user to work with
 	testUser := cltest.CreateUserWithRole(t, sessions.UserRoleEdit)
-	require.NoError(t, app.SessionORM().CreateUser(&testUser))
+	require.NoError(t, app.AuthenticationProvider().CreateUser(&testUser))
 	client := app.NewHTTPClient(testUser.Email)
 
 	// Assert all edit routes
@@ -393,7 +393,7 @@ func TestRBAC_Routemap_Run(t *testing.T) {
 
 	// Create a test run user to work with
 	testUser := cltest.CreateUserWithRole(t, sessions.UserRoleRun)
-	require.NoError(t, app.SessionORM().CreateUser(&testUser))
+	require.NoError(t, app.AuthenticationProvider().CreateUser(&testUser))
 	client := app.NewHTTPClient(testUser.Email)
 
 	// Assert all run routes
@@ -441,7 +441,7 @@ func TestRBAC_Routemap_ViewOnly(t *testing.T) {
 
 	// Create a test run user to work with
 	testUser := cltest.CreateUserWithRole(t, sessions.UserRoleView)
-	require.NoError(t, app.SessionORM().CreateUser(&testUser))
+	require.NoError(t, app.AuthenticationProvider().CreateUser(&testUser))
 	client := app.NewHTTPClient(testUser.Email)
 
 	// Assert all view only routes

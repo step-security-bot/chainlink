@@ -53,14 +53,14 @@ func TestShell_RunNodeWithPasswords(t *testing.T) {
 			})
 			db := pgtest.NewSqlxDB(t)
 			keyStore := cltest.NewKeyStore(t, db, cfg.Database())
-			sessionORM := localauth.NewORM(db, time.Minute, logger.TestLogger(t), cfg.Database(), audit.NoopLogger)
+			authProviderORM := localauth.NewORM(db, time.Minute, logger.TestLogger(t), cfg.Database(), audit.NoopLogger)
 
 			// Purge the fixture users to test assumption of single admin
 			// initialUser user created above
 			pgtest.MustExec(t, db, "DELETE FROM users;")
 
 			app := mocks.NewApplication(t)
-			app.On("SessionORM").Return(sessionORM).Maybe()
+			app.On("AuthenticationProvider").Return(authProviderORM).Maybe()
 			app.On("GetKeyStore").Return(keyStore).Maybe()
 			app.On("GetChains").Return(chainlink.Chains{EVM: cltest.NewChainSetMockWithOneChain(t, evmtest.NewEthClientMock(t), evmtest.NewChainScopedConfig(t, cfg))}).Maybe()
 			app.On("Start", mock.Anything).Maybe().Return(nil)
@@ -133,7 +133,7 @@ func TestShell_RunNodeWithAPICredentialsFile(t *testing.T) {
 				c.EVM[0].Nodes[0].HTTPURL = models.MustParseURL("http://fake.com")
 			})
 			db := pgtest.NewSqlxDB(t)
-			sessionORM := localauth.NewORM(db, time.Minute, logger.TestLogger(t), cfg.Database(), audit.NoopLogger)
+			authProviderORM := localauth.NewORM(db, time.Minute, logger.TestLogger(t), cfg.Database(), audit.NoopLogger)
 
 			// Clear out fixture users/users created from the other test cases
 			// This asserts that on initial run with an empty users table that the credentials file will instantiate and
@@ -149,7 +149,7 @@ func TestShell_RunNodeWithAPICredentialsFile(t *testing.T) {
 			ethClient.On("BalanceAt", mock.Anything, mock.Anything, mock.Anything).Return(big.NewInt(10), nil).Maybe()
 
 			app := mocks.NewApplication(t)
-			app.On("SessionORM").Return(sessionORM)
+			app.On("LocalAdminUsersORM").Return(authProviderORM)
 			app.On("GetKeyStore").Return(keyStore)
 			app.On("GetChains").Return(chainlink.Chains{EVM: cltest.NewChainSetMockWithOneChain(t, ethClient, evmtest.NewChainScopedConfig(t, cfg))}).Maybe()
 			app.On("Start", mock.Anything).Maybe().Return(nil)
