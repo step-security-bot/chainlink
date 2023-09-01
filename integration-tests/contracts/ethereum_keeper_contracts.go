@@ -1383,6 +1383,12 @@ func NewKeeperConsumerBenchmarkRoundConfirmer(
 
 // ReceiveHeader will query the latest Keeper round and check to see whether the round has confirmed
 func (o *KeeperConsumerBenchmarkRoundConfirmer) ReceiveHeader(receivedHeader blockchain.NodeHeader) error {
+	log.Info().
+		Uint64("Block_Number", receivedHeader.Number.Uint64()).
+		Str("Upkeep_ID", o.upkeepID.String()).
+		Uint64("First Block_Number", o.firstBlockNum).
+		Uint64("Last Block_Number", o.lastBlockNum).
+		Msg("Received Header")
 	if receivedHeader.Number.Uint64() <= o.lastBlockNum { // Uncle / reorg we won't count
 		return nil
 	}
@@ -1400,6 +1406,12 @@ func (o *KeeperConsumerBenchmarkRoundConfirmer) ReceiveHeader(receivedHeader blo
 
 	if upkeepCount.Int64() > o.upkeepCount { // A new upkeep was done
 		if upkeepCount.Int64() != o.upkeepCount+1 {
+			log.Error().
+				Uint64("Block_Number", receivedHeader.Number.Uint64()).
+				Str("Upkeep_ID", o.upkeepID.String()).
+				Int64("Upkeep_Count", upkeepCount.Int64()).
+				Int64("New Upkeep_Count", o.upkeepCount).
+				Msg("Upkeep count increased by more than 1 in a single block")
 			return errors.New("upkeep count increased by more than 1 in a single block")
 		}
 		log.Info().
