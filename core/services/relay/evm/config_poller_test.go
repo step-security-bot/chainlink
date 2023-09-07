@@ -54,8 +54,8 @@ func TestConfigPoller(t *testing.T) {
 		user,
 		b,
 		linkTokenAddress,
-		median.MinValue(),
-		median.MaxValue(),
+		big.NewInt(0),
+		big.NewInt(10),
 		accessAddress,
 		accessAddress,
 		9,
@@ -77,7 +77,7 @@ func TestConfigPoller(t *testing.T) {
 	t.Cleanup(func() { lp.Close() })
 
 	t.Run("happy path", func(t *testing.T) {
-		cp, err := NewConfigPoller(lggr, ethClient, lp, ocrAddress, configStoreContractAddr)
+		cp, err := NewConfigPoller(lggr, ethClient, lp, ocrAddress, &configStoreContractAddr)
 		require.NoError(t, err)
 		// Should have no config to begin with.
 		_, config, err := cp.LatestConfigDetails(testutils.Context(t))
@@ -123,8 +123,8 @@ func TestConfigPoller(t *testing.T) {
 		user,
 		b,
 		linkTokenAddress,
-		median.MinValue(),
-		median.MaxValue(),
+		big.NewInt(0),
+		big.NewInt(10),
 		accessAddress,
 		accessAddress,
 		9,
@@ -140,7 +140,7 @@ func TestConfigPoller(t *testing.T) {
 		mp.On("LatestLogByEventSigWithConfs", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, sql.ErrNoRows)
 
 		t.Run("if callLatestConfigDetails succeeds", func(t *testing.T) {
-			cp, err := newConfigPoller(lggr, ethClient, mp, ocrAddress, configStoreContractAddr)
+			cp, err := newConfigPoller(lggr, ethClient, mp, ocrAddress, &configStoreContractAddr)
 			require.NoError(t, err)
 
 			t.Run("when config has not been set, returns zero values", func(t *testing.T) {
@@ -177,10 +177,10 @@ func TestConfigPoller(t *testing.T) {
 			failingClient := new(evmClientMocks.Client)
 			failingClient.On("ConfiguredChainID").Return(big.NewInt(42))
 			failingClient.On("CallContract", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("something exploded!"))
-			cp, err := newConfigPoller(lggr, failingClient, mp, ocrAddress, configStoreContractAddr)
+			cp, err := newConfigPoller(lggr, failingClient, mp, ocrAddress, &configStoreContractAddr)
 			require.NoError(t, err)
 
-			cp.configStoreContractAddr = configStoreContractAddr
+			cp.configStoreContractAddr = &configStoreContractAddr
 			cp.configStoreContract = configStoreContract
 
 			_, _, err = cp.LatestConfigDetails(testutils.Context(t))
@@ -195,8 +195,8 @@ func TestConfigPoller(t *testing.T) {
 		user,
 		b,
 		linkTokenAddress,
-		median.MinValue(),
-		median.MaxValue(),
+		big.NewInt(0),
+		big.NewInt(10),
 		accessAddress,
 		accessAddress,
 		9,
@@ -213,7 +213,7 @@ func TestConfigPoller(t *testing.T) {
 		mp.On("LatestLogByEventSigWithConfs", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, sql.ErrNoRows)
 
 		t.Run("if callReadConfig succeeds", func(t *testing.T) {
-			cp, err := newConfigPoller(lggr, ethClient, mp, ocrAddress, configStoreContractAddr)
+			cp, err := newConfigPoller(lggr, ethClient, mp, ocrAddress, &configStoreContractAddr)
 			require.NoError(t, err)
 
 			t.Run("when config has not been set, returns zero values", func(t *testing.T) {
@@ -278,7 +278,7 @@ func TestConfigPoller(t *testing.T) {
 				// initial call to retrieve config store address from aggregator
 				return *callArgs.To == ocrAddress
 			}), mock.Anything).Return(nil, errors.New("something exploded!")).Once()
-			cp, err := newConfigPoller(lggr, failingClient, mp, ocrAddress, configStoreContractAddr)
+			cp, err := newConfigPoller(lggr, failingClient, mp, ocrAddress, &configStoreContractAddr)
 			require.NoError(t, err)
 
 			_, err = cp.LatestConfig(testutils.Context(t), 0)
@@ -320,7 +320,7 @@ func setConfig(t *testing.T, pluginConfig median.OffchainConfig, ocrContract *oc
 		50*time.Millisecond,
 		50*time.Millisecond,
 		1, // faults
-		generateDefaultOCR2OnchainConfig(),
+		generateDefaultOCR2OnchainConfig(big.NewInt(0), big.NewInt(10)),
 	)
 	require.NoError(t, err)
 	signerAddresses, err := OnchainPublicKeyToAddress(signers)
@@ -345,7 +345,7 @@ func addConfig(t *testing.T, user *bind.TransactOpts, configStoreContract *ocrco
 	require.NoError(t, err)
 }
 
-func generateDefaultOCR2OnchainConfig() []byte {
+func generateDefaultOCR2OnchainConfig(minValue *big.Int, maxValue *big.Int) []byte {
 	serializedConfig := make([]byte, 0)
 
 	s1, err := bigbigendian.SerializeSigned(1, big.NewInt(1)) //version
@@ -354,13 +354,13 @@ func generateDefaultOCR2OnchainConfig() []byte {
 	}
 	serializedConfig = append(serializedConfig, s1...)
 
-	s2, err := bigbigendian.SerializeSigned(24, median.MinValue()) //min
+	s2, err := bigbigendian.SerializeSigned(24, minValue) //min
 	if err != nil {
 		panic(err)
 	}
 	serializedConfig = append(serializedConfig, s2...)
 
-	s3, err := bigbigendian.SerializeSigned(24, median.MaxValue()) //max
+	s3, err := bigbigendian.SerializeSigned(24, maxValue) //max
 	if err != nil {
 		panic(err)
 	}
