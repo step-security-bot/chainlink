@@ -29,8 +29,10 @@ AllowSimplePasswords=true
   This can help on chains such as BSC which "manage" state bloat by arbitrarily deleting logs 
   older than a certain date. In this case, if logs are missing we will query the contract directly
   and retrieve the latest config from chain state. Chainlink will perform no
-  extra RPC calls unless the contract has this feature explicitly enabled. On
-  chains that require this, nops may see an increase in RPC calls.
+  extra RPC calls unless the job spec has this feature explicitly enabled. On
+  chains that require this, nops may see an increase in RPC calls. This can be
+  enabled for OCR2 jobs by specifying `configContractAddress` in the relay
+  config TOML.
 
 <!-- unreleasedstop -->
 

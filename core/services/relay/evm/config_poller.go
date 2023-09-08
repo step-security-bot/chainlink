@@ -230,17 +230,13 @@ func (cp *configPoller) callLatestConfigDetails(ctx context.Context) (changedInB
 
 // RPC call to read config from config store contract
 func (cp *configPoller) callReadConfigFromStore(ctx context.Context, expectChangedInBlock uint64) (cfg ocrtypes.ContractConfig, err error) {
-	changedInBlock, configDigest, err := cp.LatestConfigDetails(ctx)
+	_, configDigest, err := cp.LatestConfigDetails(ctx)
 	if err != nil {
 		failedRPCContractCalls.WithLabelValues(cp.client.ConfiguredChainID().String(), cp.aggregatorContractAddr.Hex()).Inc()
 		return cfg, fmt.Errorf("failed to get latest config details: %w", err)
 	}
 	if configDigest == (ocrtypes.ConfigDigest{}) {
 		return cfg, nil
-	}
-	// FIXME: How to handle this case?
-	if changedInBlock < expectChangedInBlock {
-		return cfg, fmt.Errorf("stale config: expected to find config changed in block %d or greater but the config was changed in block %d (digest: %s)", expectChangedInBlock, changedInBlock, configDigest)
 	}
 
 	storedConfig, err := cp.configStoreContract.ReadConfig(&bind.CallOpts{
