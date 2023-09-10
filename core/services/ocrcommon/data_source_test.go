@@ -106,7 +106,7 @@ func Test_NewDataSourceV2(t *testing.T) {
 			},
 		}, nil)
 
-	resChan := make(chan pipeline.Run, 100)
+	resChan := make(chan *pipeline.Run, 100)
 	ds := ocrcommon.NewDataSourceV2(runner, job.Job{}, pipeline.Spec{}, logger.TestLogger(t), resChan, nil)
 	val, err := ds.Observe(testutils.Context(t), types.ReportTimestamp{})
 	require.NoError(t, err)
@@ -127,7 +127,7 @@ func Test_NewDataSourceV1(t *testing.T) {
 			},
 		}, nil)
 
-	resChan := make(chan pipeline.Run, 100)
+	resChan := make(chan *pipeline.Run, 100)
 	ds := ocrcommon.NewDataSourceV1(runner, job.Job{}, pipeline.Spec{}, logger.TestLogger(t), resChan, nil)
 	val, err := ds.Observe(testutils.Context(t), ocrtypes.ReportTimestamp{})
 	require.NoError(t, err)

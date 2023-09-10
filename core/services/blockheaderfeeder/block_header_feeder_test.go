@@ -32,8 +32,8 @@ func TestFeeder(t *testing.T) {
 		getBatchCallCount   uint16
 		storeBatchCallCount uint16
 		storedEarliest      bool
-		bhs                 blockhashstore.TestBHS
-		batchBHS            blockhashstore.TestBatchBHS
+		bhs                 *blockhashstore.TestBHS
+		batchBHS            *blockhashstore.TestBatchBHS
 	}{
 		{
 			name:                "single missing block",
@@ -129,7 +129,7 @@ func TestFeeder(t *testing.T) {
 			wait:                256,
 			lookback:            500,
 			latest:              450,
-			bhs:                 blockhashstore.TestBHS{ErrorsIsStored: []uint64{150}},
+			bhs:                 &blockhashstore.TestBHS{ErrorsIsStored: []uint64{150}},
 			alreadyStored:       []uint64{155},
 			expectedStored:      []uint64{151, 152, 153, 154, 155},
 			getBatchSize:        1,
@@ -143,7 +143,7 @@ func TestFeeder(t *testing.T) {
 			wait:                256,
 			lookback:            500,
 			latest:              450,
-			bhs:                 blockhashstore.TestBHS{ErrorsIsStored: []uint64{151}},
+			bhs:                 &blockhashstore.TestBHS{ErrorsIsStored: []uint64{151}},
 			alreadyStored:       []uint64{155},
 			expectedStored:      []uint64{150, 151, 152, 153, 154, 155},
 			getBatchSize:        1,
@@ -161,7 +161,7 @@ func TestFeeder(t *testing.T) {
 			expectedStored:    []uint64{155},
 			getBatchSize:      1,
 			getBatchCallCount: 1,
-			batchBHS:          blockhashstore.TestBatchBHS{GetBlockhashesError: errors.New("internal failure")},
+			batchBHS:          &blockhashstore.TestBatchBHS{GetBlockhashesError: errors.New("internal failure")},
 			expectedErrMsg:    "finding earliest blocknumber with blockhash: fetching blockhashes: internal failure",
 		},
 		{
@@ -176,7 +176,7 @@ func TestFeeder(t *testing.T) {
 			storeBatchSize:      1,
 			getBatchCallCount:   5,
 			storeBatchCallCount: 1,
-			batchBHS:            blockhashstore.TestBatchBHS{StoreVerifyHeadersError: errors.New("invalid header")},
+			batchBHS:            &blockhashstore.TestBatchBHS{StoreVerifyHeadersError: errors.New("invalid header")},
 			expectedErrMsg:      "store block headers: invalid header",
 		},
 	}
@@ -200,8 +200,8 @@ func TestFeeder(t *testing.T) {
 		feeder := NewBlockHeaderFeeder(
 			lggr,
 			coordinator,
-			&test.bhs,
-			&test.batchBHS,
+			test.bhs,
+			test.batchBHS,
 			blockHeaderProvider,
 			test.wait,
 			test.lookback,

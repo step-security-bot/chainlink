@@ -53,7 +53,7 @@ var (
 		wait                    int
 		lookback                int
 		latest                  uint64
-		bhs                     TestBHS
+		bhs                     *TestBHS
 		expectedStored          []uint64
 		expectedStoredMapBlocks []uint64 // expected state of stored map in Feeder struct
 		expectedErrMsg          string
@@ -83,7 +83,7 @@ var (
 			wait:                    25,
 			lookback:                100,
 			latest:                  200,
-			bhs:                     TestBHS{Stored: []uint64{150}},
+			bhs:                     &TestBHS{Stored: []uint64{150}},
 			expectedStored:          []uint64{150},
 			expectedStoredMapBlocks: []uint64{},
 		},
@@ -93,7 +93,7 @@ var (
 			wait:                    25,
 			lookback:                100,
 			latest:                  200,
-			bhs:                     TestBHS{ErrorsIsStored: []uint64{150}},
+			bhs:                     &TestBHS{ErrorsIsStored: []uint64{150}},
 			expectedStored:          []uint64{150},
 			expectedStoredMapBlocks: []uint64{150},
 			expectedErrMsg:          "checking if stored: error checking if stored",
@@ -104,7 +104,7 @@ var (
 			wait:                    25,
 			lookback:                100,
 			latest:                  200,
-			bhs:                     TestBHS{ErrorsStore: []uint64{150}},
+			bhs:                     &TestBHS{ErrorsStore: []uint64{150}},
 			expectedStored:          []uint64{151},
 			expectedStoredMapBlocks: []uint64{151},
 			expectedErrMsg:          "storing block: error storing",
@@ -249,7 +249,7 @@ func TestFeeder(t *testing.T) {
 			feeder := NewFeeder(
 				logger.TestLogger(t),
 				coordinator,
-				&test.bhs,
+				test.bhs,
 				lp,
 				0,
 				test.wait,
@@ -341,7 +341,7 @@ func TestFeederWithLogPollerVRFv1(t *testing.T) {
 			feeder := NewFeeder(
 				logger.TestLogger(t),
 				coordinator,
-				&test.bhs,
+				test.bhs,
 				lp,
 				0,
 				test.wait,
@@ -437,7 +437,7 @@ func TestFeederWithLogPollerVRFv2(t *testing.T) {
 			feeder := NewFeeder(
 				logger.TestLogger(t),
 				coordinator,
-				&test.bhs,
+				test.bhs,
 				lp,
 				0,
 				test.wait,
@@ -533,7 +533,7 @@ func TestFeederWithLogPollerVRFv2Plus(t *testing.T) {
 			feeder := NewFeeder(
 				logger.TestLogger(t),
 				coordinator,
-				&test.bhs,
+				test.bhs,
 				lp,
 				0,
 				test.wait,
