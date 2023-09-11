@@ -1,6 +1,8 @@
 ChainID = '1442'
+#For users transacting within the rollup, finality is fast, 2 - 3s & The guarantee is given by the trusted sequencer to include the blocks even after reorgs as per zkEVM
 FinalityDepth = 1
-NoNewHeadsThreshold = '12m'
+#Current Average Block production rate is ~2m(batched 1 txn in 1 block) & given a large buffer to wait for before erroring out
+NoNewHeadsThreshold = '10m'
 MinIncomingConfirmations = 1
 LogPollInterval = '30s'
 
