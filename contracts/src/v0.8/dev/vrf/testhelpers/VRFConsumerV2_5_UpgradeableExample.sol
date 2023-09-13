@@ -2,25 +2,29 @@
 pragma solidity ^0.8.0;
 
 import "../../../shared/interfaces/LinkTokenInterface.sol";
-import "../../interfaces/IVRFCoordinatorV2Plus.sol";
-import "../VRFConsumerBaseV2Plus.sol";
+import "../../interfaces/IVRFCoordinatorV2_5.sol";
+import "../../VRFConsumerBaseV2Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable-4.7.3/proxy/utils/Initializable.sol";
 
-// VRFV2RevertingExample will always revert. Used for testing only, useless in prod.
-contract VRFV2PlusRevertingExample is VRFConsumerBaseV2Plus {
+contract VRFConsumerV2_5UpgradeableExample is Initializable, VRFConsumerBaseV2Upgradeable {
   uint256[] public s_randomWords;
   uint256 public s_requestId;
-  IVRFCoordinatorV2Plus COORDINATOR;
-  LinkTokenInterface LINKTOKEN;
+  IVRFCoordinatorV2_5 public COORDINATOR;
+  LinkTokenInterface public LINKTOKEN;
   uint256 public s_subId;
   uint256 public s_gasAvailable;
 
-  constructor(address vrfCoordinator, address link) VRFConsumerBaseV2Plus(vrfCoordinator) {
-    COORDINATOR = IVRFCoordinatorV2Plus(vrfCoordinator);
-    LINKTOKEN = LinkTokenInterface(link);
+  function initialize(address _vrfCoordinator, address _link) public initializer {
+    __VRFConsumerBaseV2_init(_vrfCoordinator);
+    COORDINATOR = IVRFCoordinatorV2_5(_vrfCoordinator);
+    LINKTOKEN = LinkTokenInterface(_link);
   }
 
-  function fulfillRandomWords(uint256, uint256[] memory) internal pure override {
-    revert();
+  function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {
+    require(requestId == s_requestId, "request ID is incorrect");
+
+    s_gasAvailable = gasleft();
+    s_randomWords = randomWords;
   }
 
   function createSubscriptionAndFund(uint96 amount) external {
@@ -52,7 +56,7 @@ contract VRFV2PlusRevertingExample is VRFConsumerBaseV2Plus {
     uint32 callbackGasLimit,
     uint32 numWords
   ) external returns (uint256) {
-    VRFV2PlusClient.RandomWordsRequest memory req = VRFV2PlusClient.RandomWordsRequest({
+    VRFV2_5_Client.RandomWordsRequest memory req = VRFV2_5_Client.RandomWordsRequest({
       keyHash: keyHash,
       subId: subId,
       requestConfirmations: minReqConfs,

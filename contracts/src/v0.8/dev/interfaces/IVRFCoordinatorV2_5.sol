@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.0;
 
-import "../vrf/libraries/VRFV2PlusClient.sol";
+import "../vrf/libraries/VRFV2_5_Client.sol";
+import "./IVRFSubscriptionV2_5.sol";
 
-// Interface that enables consumers of VRFCoordinatorV2Plus to be future-proof for upgrades
-// This interface is supported by subsequent versions of VRFCoordinatorV2Plus
-interface IVRFMigratableCoordinatorV2Plus {
+// Interface that enables consumers of VRFCoordinatorV2_5 to be future-proof for upgrades
+// This interface is supported by subsequent versions of VRFCoordinatorV2_5
+interface IVRFCoordinatorV2_5 is IVRFSubscriptionV2_5 {
   /**
    * @notice Request a set of random words.
    * @param req - a struct containing following fiels for randomness request:
@@ -27,9 +28,9 @@ interface IVRFMigratableCoordinatorV2Plus {
    * numWords - The number of uint256 random values you'd like to receive
    * in your fulfillRandomWords callback. Note these numbers are expanded in a
    * secure way by the VRFCoordinator from a single random value supplied by the oracle.
-   * nativePayment - Whether payment should be made in ETH or LINK.
+   * extraArgs - abi-encoded extra args
    * @return requestId - A unique identifier of the request. Can be used to match
    * a request to a response in fulfillRandomWords.
    */
-  function requestRandomWords(VRFV2PlusClient.RandomWordsRequest calldata req) external returns (uint256 requestId);
+  function requestRandomWords(VRFV2_5_Client.RandomWordsRequest calldata req) external returns (uint256 requestId);
 }

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "../interfaces/IVRFMigratableCoordinatorV2Plus.sol";
-import "../interfaces/IVRFMigratableConsumerV2Plus.sol";
+import "../interfaces/IVRFCoordinatorV2_5.sol";
+import "../interfaces/IVRFMigratableConsumerV2_5.sol";
 import "../../shared/access/ConfirmedOwner.sol";
 
 /** ****************************************************************************
@@ -25,18 +25,18 @@ import "../../shared/access/ConfirmedOwner.sol";
  * @dev The purpose of this contract is to make it easy for unrelated contracts
  * @dev to talk to Vera the verifier about the work Reggie is doing, to provide
  * @dev simple access to a verifiable source of randomness. It ensures 2 things:
- * @dev 1. The fulfillment came from the VRFCoordinatorV2Plus.
+ * @dev 1. The fulfillment came from the VRFCoordinatorV2_5.
  * @dev 2. The consumer contract implements fulfillRandomWords.
  * *****************************************************************************
  * @dev USAGE
  *
- * @dev Calling contracts must inherit from VRFConsumerBaseV2Plus, and can
- * @dev initialize VRFConsumerBaseV2Plus's attributes in their constructor as
+ * @dev Calling contracts must inherit from VRFConsumerBaseV2_5, and can
+ * @dev initialize VRFConsumerBaseV2_5's attributes in their constructor as
  * @dev shown:
  *
- * @dev   contract VRFConsumerV2Plus is VRFConsumerBaseV2Plus {
- * @dev     constructor(<other arguments>, address _vrfCoordinator, address _subOwner)
- * @dev       VRFConsumerBaseV2Plus(_vrfCoordinator, _subOwner) public {
+ * @dev   contract VRFConsumerV2_5 is VRFConsumerBaseV2_5 {
+ * @dev     constructor(<other arguments>, address _vrfCoordinator)
+ * @dev       VRFConsumerBaseV2_5(_vrfCoordinator) public {
  * @dev         <initialization with other arguments goes here>
  * @dev       }
  * @dev   }
@@ -47,9 +47,15 @@ import "../../shared/access/ConfirmedOwner.sol";
  * @dev subscription management functions).
  * @dev Call requestRandomWords(keyHash, subId, minimumRequestConfirmations,
  * @dev callbackGasLimit, numWords, extraArgs),
- * @dev see (IVRFCoordinatorV2Plus for a description of the arguments).
+ * @dev see (IVRFCoordinatorV2_5 for a description of the arguments).
+ * 
+ * @dev When requesting randomness or managing subscription in calling contract (child contract), 
+ * @dev use s_vrfCoordinator that is initialized in the base consumer 
+ * @dev (e.g. s_vrfCoordinator.requestRandomWords(args...))
+ * @dev This allows requestRandomWords to continue to work after migrations
+ * @dev because s_vrfCoordinator is managed by VRFCoordinatorV2_5 (see migrate() method) 
  *
- * @dev Once the VRFCoordinatorV2Plus has received and validated the oracle's response
+ * @dev Once the VRFCoordinatorV2_5 has received and validated the oracle's response
  * @dev to your request, it will call your contract's fulfillRandomWords method.
  *
  * @dev The randomness argument to fulfillRandomWords is a set of random words
@@ -70,7 +76,7 @@ import "../../shared/access/ConfirmedOwner.sol";
  * @dev A method with the ability to call your fulfillRandomness method directly
  * @dev could spoof a VRF response with any random value, so it's critical that
  * @dev it cannot be directly called by anything other than this base contract
- * @dev (specifically, by the VRFConsumerBaseV2Plus.rawFulfillRandomness method).
+ * @dev (specifically, by the VRFConsumerBaseV2_5.rawFulfillRandomness method).
  *
  * @dev For your users to trust that your contract's random behavior is free
  * @dev from malicious interference, it's best if you can write it so that all
@@ -98,18 +104,24 @@ import "../../shared/access/ConfirmedOwner.sol";
  * @dev responding to the request (however this is not enforced in the contract
  * @dev and so remains effective only in the case of unmodified oracle software).
  */
-abstract contract VRFConsumerBaseV2Plus is IVRFMigratableConsumerV2Plus, ConfirmedOwner {
+abstract contract VRFConsumerBaseV2_5 is IVRFMigratableConsumerV2_5, ConfirmedOwner {
   error OnlyCoordinatorCanFulfill(address have, address want);
   error OnlyOwnerOrCoordinator(address have, address owner, address coordinator);
   error ZeroAddress();
 
-  IVRFMigratableCoordinatorV2Plus internal s_vrfCoordinator;
+  /**
+   * @dev VRFConsumerBaseV2_5 expects inheriting contracts to use s_vrfCoordinator
+   * @dev to request randomness and manage subscriptions
+   * @dev this future-proofs the consumer contract after migrations
+   * @dev because s_vrfCoordinator is managed by VRFCoordinatorV2_5 (see migrate())
+   */
+  IVRFCoordinatorV2_5 internal s_vrfCoordinator;
 
   /**
    * @param _vrfCoordinator address of VRFCoordinator contract
    */
   constructor(address _vrfCoordinator) ConfirmedOwner(msg.sender) {
-    s_vrfCoordinator = IVRFMigratableCoordinatorV2Plus(_vrfCoordinator);
+    s_vrfCoordinator = IVRFCoordinatorV2_5(_vrfCoordinator);
   }
 
   /**
@@ -118,7 +130,7 @@ abstract contract VRFConsumerBaseV2Plus is IVRFMigratableConsumerV2Plus, Confirm
    * @notice principles to keep in mind when implementing your fulfillRandomness
    * @notice method.
    *
-   * @dev VRFConsumerBaseV2Plus expects its subcontracts to have a method with this
+   * @dev VRFConsumerBaseV2_5 expects its subcontracts to have a method with this
    * @dev signature, and will call it once it has verified the proof
    * @dev associated with the randomness. (It is triggered via a call to
    * @dev rawFulfillRandomness, below.)
@@ -139,10 +151,10 @@ abstract contract VRFConsumerBaseV2Plus is IVRFMigratableConsumerV2Plus, Confirm
   }
 
   /**
-   * @inheritdoc IVRFMigratableConsumerV2Plus
+   * @inheritdoc IVRFMigratableConsumerV2_5
    */
   function setCoordinator(address _vrfCoordinator) public override onlyOwnerOrCoordinator {
-    s_vrfCoordinator = IVRFMigratableCoordinatorV2Plus(_vrfCoordinator);
+    s_vrfCoordinator = IVRFCoordinatorV2_5(_vrfCoordinator);
   }
 
   modifier onlyOwnerOrCoordinator() {

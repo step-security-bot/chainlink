@@ -2,20 +2,20 @@
 pragma solidity ^0.8.0;
 
 import "../../../shared/interfaces/LinkTokenInterface.sol";
-import "../../interfaces/IVRFCoordinatorV2Plus.sol";
-import "../VRFConsumerBaseV2Plus.sol";
+import "../../interfaces/IVRFCoordinatorV2_5.sol";
+import "../VRFConsumerBaseV2_5.sol";
 
-contract VRFMaliciousConsumerV2Plus is VRFConsumerBaseV2Plus {
+contract VRFMaliciousConsumerV2_5 is VRFConsumerBaseV2_5 {
   uint256[] public s_randomWords;
   uint256 public s_requestId;
-  IVRFCoordinatorV2Plus COORDINATOR;
+  IVRFCoordinatorV2_5 COORDINATOR;
   LinkTokenInterface LINKTOKEN;
   uint256 public s_gasAvailable;
   uint256 s_subId;
   bytes32 s_keyHash;
 
-  constructor(address vrfCoordinator, address link) VRFConsumerBaseV2Plus(vrfCoordinator) {
-    COORDINATOR = IVRFCoordinatorV2Plus(vrfCoordinator);
+  constructor(address vrfCoordinator, address link) VRFConsumerBaseV2_5(vrfCoordinator) {
+    COORDINATOR = IVRFCoordinatorV2_5(vrfCoordinator);
     LINKTOKEN = LinkTokenInterface(link);
   }
 
@@ -23,7 +23,7 @@ contract VRFMaliciousConsumerV2Plus is VRFConsumerBaseV2Plus {
     s_gasAvailable = gasleft();
     s_randomWords = randomWords;
     s_requestId = requestId;
-    VRFV2PlusClient.RandomWordsRequest memory req = VRFV2PlusClient.RandomWordsRequest({
+    VRFV2_5_Client.RandomWordsRequest memory req = VRFV2_5_Client.RandomWordsRequest({
       keyHash: s_keyHash,
       subId: s_subId,
       requestConfirmations: 1,
@@ -53,7 +53,7 @@ contract VRFMaliciousConsumerV2Plus is VRFConsumerBaseV2Plus {
 
   function requestRandomness(bytes32 keyHash) external returns (uint256) {
     s_keyHash = keyHash;
-    VRFV2PlusClient.RandomWordsRequest memory req = VRFV2PlusClient.RandomWordsRequest({
+    VRFV2_5_Client.RandomWordsRequest memory req = VRFV2_5_Client.RandomWordsRequest({
       keyHash: keyHash,
       subId: s_subId,
       requestConfirmations: 1,

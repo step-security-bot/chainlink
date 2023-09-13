@@ -3,27 +3,27 @@ pragma solidity ^0.8.6;
 
 import "../../shared/access/ConfirmedOwner.sol";
 import "../../interfaces/TypeAndVersionInterface.sol";
-import "./VRFConsumerBaseV2Plus.sol";
+import "./VRFConsumerBaseV2_5.sol";
 import "../../shared/interfaces/LinkTokenInterface.sol";
 import "../../interfaces/AggregatorV3Interface.sol";
-import "../interfaces/IVRFCoordinatorV2Plus.sol";
-import "../interfaces/VRFV2PlusWrapperInterface.sol";
-import "./VRFV2PlusWrapperConsumerBase.sol";
+import "../interfaces/IVRFCoordinatorV2_5.sol";
+import "../interfaces/VRFV2_5_WrapperInterface.sol";
+import "./VRFV2_5_WrapperConsumerBase.sol";
 import "../../ChainSpecificUtil.sol";
 
 /**
- * @notice A wrapper for VRFCoordinatorV2 that provides an interface better suited to one-off
+ * @notice A wrapper for VRFCoordinatorV2_5 that provides an interface better suited to one-off
  * @notice requests for randomness.
  */
-contract VRFV2PlusWrapper is ConfirmedOwner, TypeAndVersionInterface, VRFConsumerBaseV2Plus, VRFV2PlusWrapperInterface {
+contract VRFV2_5_Wrapper is ConfirmedOwner, TypeAndVersionInterface, VRFConsumerBaseV2_5, VRFV2_5_WrapperInterface {
   event WrapperFulfillmentFailed(uint256 indexed requestId, address indexed consumer);
 
   error LinkAlreadySet();
   error FailedToTransferLink();
 
   LinkTokenInterface public s_link;
-  AggregatorV3Interface public s_linkEthFeed;
-  ExtendedVRFCoordinatorV2PlusInterface public immutable COORDINATOR;
+  AggregatorV3Interface public s_linkNativeFeed;
+  ExtendedVRFCoordinatorV2_5_Interface public immutable COORDINATOR;
   uint256 public immutable SUBSCRIPTION_ID;
   /// @dev this is the size of a VRF v2 fulfillment's calldata abi-encoded in bytes.
   /// @dev proofSize = 13 words = 13 * 256 = 3328 bits
@@ -65,7 +65,7 @@ contract VRFV2PlusWrapper is ConfirmedOwner, TypeAndVersionInterface, VRFConsume
 
   // s_fulfillmentFlatFeeLinkPPM is the flat fee in millionths of LINK that VRFCoordinatorV2
   // charges.
-  uint32 private s_fulfillmentFlatFeeEthPPM;
+  uint32 private s_fulfillmentFlatFeeNativePPM;
 
   // Other configuration
 
@@ -97,19 +97,19 @@ contract VRFV2PlusWrapper is ConfirmedOwner, TypeAndVersionInterface, VRFConsume
   }
   mapping(uint256 => Callback) /* requestID */ /* callback */ public s_callbacks;
 
-  constructor(address _link, address _linkEthFeed, address _coordinator) VRFConsumerBaseV2Plus(_coordinator) {
+  constructor(address _link, address _linkNativeFeed, address _coordinator) VRFConsumerBaseV2_5(_coordinator) {
     if (_link != address(0)) {
       s_link = LinkTokenInterface(_link);
     }
-    if (_linkEthFeed != address(0)) {
-      s_linkEthFeed = AggregatorV3Interface(_linkEthFeed);
+    if (_linkNativeFeed != address(0)) {
+      s_linkNativeFeed = AggregatorV3Interface(_linkNativeFeed);
     }
-    COORDINATOR = ExtendedVRFCoordinatorV2PlusInterface(_coordinator);
+    COORDINATOR = ExtendedVRFCoordinatorV2_5_Interface(_coordinator);
 
     // Create this wrapper's subscription and add itself as a consumer.
-    uint256 subId = ExtendedVRFCoordinatorV2PlusInterface(_coordinator).createSubscription();
+    uint256 subId = ExtendedVRFCoordinatorV2_5_Interface(_coordinator).createSubscription();
     SUBSCRIPTION_ID = subId;
-    ExtendedVRFCoordinatorV2PlusInterface(_coordinator).addConsumer(subId, address(this));
+    ExtendedVRFCoordinatorV2_5_Interface(_coordinator).addConsumer(subId, address(this));
   }
 
   /**
@@ -125,11 +125,11 @@ contract VRFV2PlusWrapper is ConfirmedOwner, TypeAndVersionInterface, VRFConsume
   }
 
   /**
-   * @notice set the link eth feed to be used by this wrapper
-   * @param linkEthFeed address of the link eth feed
+   * @notice set the link native feed to be used by this wrapper
+   * @param linkNativeFeed address of the link native feed
    */
-  function setLinkEthFeed(address linkEthFeed) external onlyOwner {
-    s_linkEthFeed = AggregatorV3Interface(linkEthFeed);
+  function setLinkNativeFeed(address linkNativeFeed) external onlyOwner {
+    s_linkNativeFeed = AggregatorV3Interface(linkNativeFeed);
   }
 
   /**
@@ -173,7 +173,7 @@ contract VRFV2PlusWrapper is ConfirmedOwner, TypeAndVersionInterface, VRFConsume
     // Get other configuration from coordinator
     (, , s_stalenessSeconds, ) = COORDINATOR.s_config();
     s_fallbackWeiPerUnitLink = COORDINATOR.s_fallbackWeiPerUnitLink();
-    (s_fulfillmentFlatFeeLinkPPM, s_fulfillmentFlatFeeEthPPM) = COORDINATOR.s_feeConfig();
+    (s_fulfillmentFlatFeeLinkPPM, s_fulfillmentFlatFeeNativePPM) = COORDINATOR.s_feeConfig();
   }
 
   /**
@@ -185,7 +185,7 @@ contract VRFV2PlusWrapper is ConfirmedOwner, TypeAndVersionInterface, VRFConsume
    * @return stalenessSeconds is the number of seconds before we consider the feed price to be stale
    *         and fallback to fallbackWeiPerUnitLink.
    *
-   * @return fulfillmentFlatFeeLinkPPM is the flat fee in millionths of LINK that VRFCoordinatorV2Plus
+   * @return fulfillmentFlatFeeLinkPPM is the flat fee in millionths of LINK that VRFCoordinatorV2_5
    *         charges.
    *
    * @return wrapperGasOverhead reflects the gas overhead of the wrapper's fulfillRandomWords
@@ -288,7 +288,7 @@ contract VRFV2PlusWrapper is ConfirmedOwner, TypeAndVersionInterface, VRFConsume
     // feeWithPremium is the fee after the percentage premium is applied
     uint256 feeWithPremium = (baseFee * (s_wrapperPremiumPercentage + 100)) / 100;
     // feeWithFlatFee is the fee after the flat fee is applied on top of the premium
-    uint256 feeWithFlatFee = feeWithPremium + (1e12 * uint256(s_fulfillmentFlatFeeEthPPM));
+    uint256 feeWithFlatFee = feeWithPremium + (1e12 * uint256(s_fulfillmentFlatFeeNativePPM));
 
     return feeWithFlatFee;
   }
@@ -340,7 +340,7 @@ contract VRFV2PlusWrapper is ConfirmedOwner, TypeAndVersionInterface, VRFConsume
     uint256 price = calculateRequestPriceInternal(callbackGasLimit, tx.gasprice, weiPerUnitLink);
     require(_amount >= price, "fee too low");
     require(numWords <= s_maxNumWords, "numWords too high");
-    VRFV2PlusClient.RandomWordsRequest memory req = VRFV2PlusClient.RandomWordsRequest({
+    VRFV2_5_Client.RandomWordsRequest memory req = VRFV2_5_Client.RandomWordsRequest({
       keyHash: s_keyHash,
       subId: SUBSCRIPTION_ID,
       requestConfirmations: requestConfirmations,
@@ -366,13 +366,13 @@ contract VRFV2PlusWrapper is ConfirmedOwner, TypeAndVersionInterface, VRFConsume
     uint256 price = calculateRequestPriceNativeInternal(_callbackGasLimit, tx.gasprice);
     require(msg.value >= price, "fee too low");
     require(_numWords <= s_maxNumWords, "numWords too high");
-    VRFV2PlusClient.RandomWordsRequest memory req = VRFV2PlusClient.RandomWordsRequest({
+    VRFV2_5_Client.RandomWordsRequest memory req = VRFV2_5_Client.RandomWordsRequest({
       keyHash: s_keyHash,
       subId: SUBSCRIPTION_ID,
       requestConfirmations: _requestConfirmations,
       callbackGasLimit: _callbackGasLimit + eip150Overhead + s_wrapperGasOverhead,
       numWords: _numWords,
-      extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}))
+      extraArgs: VRFV2_5_Client._argsToBytes(VRFV2_5_Client.ExtraArgsV1({nativePayment: true}))
     });
     requestId = COORDINATOR.requestRandomWords(req);
     s_callbacks[requestId] = Callback({
@@ -429,7 +429,7 @@ contract VRFV2PlusWrapper is ConfirmedOwner, TypeAndVersionInterface, VRFConsume
     delete s_callbacks[_requestId];
     require(callback.callbackAddress != address(0), "request not found"); // This should never happen
 
-    VRFV2PlusWrapperConsumerBase c;
+    VRFV2_5_WrapperConsumerBase c;
     bytes memory resp = abi.encodeWithSelector(c.rawFulfillRandomWords.selector, _requestId, _randomWords);
 
     bool success = callWithExactGas(callback.callbackGasLimit, callback.callbackAddress, resp);
@@ -442,7 +442,7 @@ contract VRFV2PlusWrapper is ConfirmedOwner, TypeAndVersionInterface, VRFConsume
     bool staleFallback = s_stalenessSeconds > 0;
     uint256 timestamp;
     int256 weiPerUnitLink;
-    (, weiPerUnitLink, , timestamp, ) = s_linkEthFeed.latestRoundData();
+    (, weiPerUnitLink, , timestamp, ) = s_linkNativeFeed.latestRoundData();
     // solhint-disable-next-line not-rely-on-time
     if (staleFallback && s_stalenessSeconds < block.timestamp - timestamp) {
       weiPerUnitLink = s_fallbackWeiPerUnitLink;
@@ -503,7 +503,7 @@ contract VRFV2PlusWrapper is ConfirmedOwner, TypeAndVersionInterface, VRFConsume
   }
 }
 
-interface ExtendedVRFCoordinatorV2PlusInterface is IVRFCoordinatorV2Plus {
+interface ExtendedVRFCoordinatorV2_5_Interface is IVRFCoordinatorV2_5 {
   function s_config()
     external
     view
@@ -516,5 +516,5 @@ interface ExtendedVRFCoordinatorV2PlusInterface is IVRFCoordinatorV2Plus {
 
   function s_fallbackWeiPerUnitLink() external view returns (int256);
 
-  function s_feeConfig() external view returns (uint32 fulfillmentFlatFeeLinkPPM, uint32 fulfillmentFlatFeeEthPPM);
+  function s_feeConfig() external view returns (uint32 fulfillmentFlatFeeLinkPPM, uint32 fulfillmentFlatFeeNativePPM);
 }

@@ -3,12 +3,12 @@
 pragma solidity ^0.8.0;
 
 import "../../../shared/interfaces/LinkTokenInterface.sol";
-import "../../interfaces/IVRFCoordinatorV2Plus.sol";
-import "../VRFConsumerBaseV2Plus.sol";
+import "../../interfaces/IVRFCoordinatorV2_5.sol";
+import "../VRFConsumerBaseV2_5.sol";
 
 /// @notice This contract is used for testing only and should not be used for production.
-contract VRFV2PlusSingleConsumerExample is VRFConsumerBaseV2Plus {
-  IVRFCoordinatorV2Plus COORDINATOR;
+contract VRFV2_5_SingleConsumerExample is VRFConsumerBaseV2_5 {
+  IVRFCoordinatorV2_5 COORDINATOR;
   LinkTokenInterface LINKTOKEN;
 
   struct RequestConfig {
@@ -32,8 +32,8 @@ contract VRFV2PlusSingleConsumerExample is VRFConsumerBaseV2Plus {
     uint32 numWords,
     bytes32 keyHash,
     bool nativePayment
-  ) VRFConsumerBaseV2Plus(vrfCoordinator) {
-    COORDINATOR = IVRFCoordinatorV2Plus(vrfCoordinator);
+  ) VRFConsumerBaseV2_5(vrfCoordinator) {
+    COORDINATOR = IVRFCoordinatorV2_5(vrfCoordinator);
     LINKTOKEN = LinkTokenInterface(link);
     s_owner = msg.sender;
     s_requestConfig = RequestConfig({
@@ -55,13 +55,13 @@ contract VRFV2PlusSingleConsumerExample is VRFConsumerBaseV2Plus {
   // Assumes the subscription is funded sufficiently.
   function requestRandomWords() external onlyOwner {
     RequestConfig memory rc = s_requestConfig;
-    VRFV2PlusClient.RandomWordsRequest memory req = VRFV2PlusClient.RandomWordsRequest({
+    VRFV2_5_Client.RandomWordsRequest memory req = VRFV2_5_Client.RandomWordsRequest({
       keyHash: rc.keyHash,
       subId: rc.subId,
       requestConfirmations: rc.requestConfirmations,
       callbackGasLimit: rc.callbackGasLimit,
       numWords: rc.numWords,
-      extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: rc.nativePayment}))
+      extraArgs: VRFV2_5_Client._argsToBytes(VRFV2_5_Client.ExtraArgsV1({nativePayment: rc.nativePayment}))
     });
     // Will revert if subscription is not set and funded.
     s_requestId = COORDINATOR.requestRandomWords(req);
@@ -74,13 +74,13 @@ contract VRFV2PlusSingleConsumerExample is VRFConsumerBaseV2Plus {
   function fundAndRequestRandomWords(uint256 amount) external onlyOwner {
     RequestConfig memory rc = s_requestConfig;
     LINKTOKEN.transferAndCall(address(COORDINATOR), amount, abi.encode(s_requestConfig.subId));
-    VRFV2PlusClient.RandomWordsRequest memory req = VRFV2PlusClient.RandomWordsRequest({
+    VRFV2_5_Client.RandomWordsRequest memory req = VRFV2_5_Client.RandomWordsRequest({
       keyHash: rc.keyHash,
       subId: rc.subId,
       requestConfirmations: rc.requestConfirmations,
       callbackGasLimit: rc.callbackGasLimit,
       numWords: rc.numWords,
-      extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: rc.nativePayment}))
+      extraArgs: VRFV2_5_Client._argsToBytes(VRFV2_5_Client.ExtraArgsV1({nativePayment: rc.nativePayment}))
     });
     // Will revert if subscription is not set and funded.
     s_requestId = COORDINATOR.requestRandomWords(req);

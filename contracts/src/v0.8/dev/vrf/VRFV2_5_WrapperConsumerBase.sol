@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "../../shared/interfaces/LinkTokenInterface.sol";
-import "../interfaces/VRFV2PlusWrapperInterface.sol";
+import "../interfaces/VRFV2_5_WrapperInterface.sol";
 
 /**
  *
@@ -20,30 +20,30 @@ import "../interfaces/VRFV2PlusWrapperInterface.sol";
  * *****************************************************************************
  * @dev USAGE
  *
- * @dev Calling contracts must inherit from VRFV2PlusWrapperConsumerBase. The consumer must be funded
- * @dev with enough LINK or ether to make the request, otherwise requests will revert. To request randomness,
+ * @dev Calling contracts must inherit from VRFV2_5_WrapperConsumerBase. The consumer must be funded
+ * @dev with enough LINK or native to make the request, otherwise requests will revert. To request randomness,
  * @dev call the 'requestRandomWords' function with the desired VRF parameters. This function handles
  * @dev paying for the request based on the current pricing.
  *
  * @dev Consumers must implement the fullfillRandomWords function, which will be called during
  * @dev fulfillment with the randomness result.
  */
-abstract contract VRFV2PlusWrapperConsumerBase {
+abstract contract VRFV2_5_WrapperConsumerBase {
   error LINKAlreadySet();
 
   LinkTokenInterface internal LINK;
-  VRFV2PlusWrapperInterface internal VRF_V2_PLUS_WRAPPER;
+  VRFV2_5_WrapperInterface internal VRF_V2_5_WRAPPER;
 
   /**
    * @param _link is the address of LinkToken
-   * @param _vrfV2PlusWrapper is the address of the VRFV2Wrapper contract
+   * @param _vrfV2_5_Wrapper is the address of the VRFV2Wrapper contract
    */
-  constructor(address _link, address _vrfV2PlusWrapper) {
+  constructor(address _link, address _vrfV2_5_Wrapper) {
     if (_link != address(0)) {
       LINK = LinkTokenInterface(_link);
     }
 
-    VRF_V2_PLUS_WRAPPER = VRFV2PlusWrapperInterface(_vrfV2PlusWrapper);
+    VRF_V2_5_WRAPPER = VRFV2_5_WrapperInterface(_vrfV2_5_Wrapper);
   }
 
   /**
@@ -76,11 +76,11 @@ abstract contract VRFV2PlusWrapperConsumerBase {
     uint32 _numWords
   ) internal returns (uint256 requestId) {
     LINK.transferAndCall(
-      address(VRF_V2_PLUS_WRAPPER),
-      VRF_V2_PLUS_WRAPPER.calculateRequestPrice(_callbackGasLimit),
+      address(VRF_V2_5_WRAPPER),
+      VRF_V2_5_WRAPPER.calculateRequestPrice(_callbackGasLimit),
       abi.encode(_callbackGasLimit, _requestConfirmations, _numWords)
     );
-    return VRF_V2_PLUS_WRAPPER.lastRequestId();
+    return VRF_V2_5_WRAPPER.lastRequestId();
   }
 
   function requestRandomnessPayInNative(
@@ -88,9 +88,9 @@ abstract contract VRFV2PlusWrapperConsumerBase {
     uint16 _requestConfirmations,
     uint32 _numWords
   ) internal returns (uint256 requestId) {
-    uint256 requestPrice = VRF_V2_PLUS_WRAPPER.calculateRequestPriceNative(_callbackGasLimit);
+    uint256 requestPrice = VRF_V2_5_WRAPPER.calculateRequestPriceNative(_callbackGasLimit);
     return
-      VRF_V2_PLUS_WRAPPER.requestRandomWordsInNative{value: requestPrice}(
+      VRF_V2_5_WRAPPER.requestRandomWordsInNative{value: requestPrice}(
         _callbackGasLimit,
         _requestConfirmations,
         _numWords
@@ -107,7 +107,7 @@ abstract contract VRFV2PlusWrapperConsumerBase {
   function fulfillRandomWords(uint256 _requestId, uint256[] memory _randomWords) internal virtual;
 
   function rawFulfillRandomWords(uint256 _requestId, uint256[] memory _randomWords) external {
-    require(msg.sender == address(VRF_V2_PLUS_WRAPPER), "only VRF V2 Plus wrapper can fulfill");
+    require(msg.sender == address(VRF_V2_5_WRAPPER), "only VRF V2_5 wrapper can fulfill");
     fulfillRandomWords(_requestId, _randomWords);
   }
 }

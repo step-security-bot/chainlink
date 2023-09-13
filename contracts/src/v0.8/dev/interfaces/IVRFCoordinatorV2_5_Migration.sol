@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-// Future versions of VRFCoordinatorV2Plus must implement IVRFCoordinatorV2PlusMigration
+// Future versions of VRFCoordinatorV2_5 must implement IVRFCoordinatorV2_5_Migration
 // to support migrations from previous versions
-interface IVRFCoordinatorV2PlusMigration {
+interface IVRFCoordinatorV2_5_Migration {
   /**
    * @notice called by older versions of coordinator for migration.
    * @notice only callable by older versions of coordinator

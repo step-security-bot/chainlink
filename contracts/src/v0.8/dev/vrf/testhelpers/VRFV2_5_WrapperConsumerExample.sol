@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.6;
 
-import "../VRFV2PlusWrapperConsumerBase.sol";
+import "../VRFV2_5_WrapperConsumerBase.sol";
 import "../../../shared/access/ConfirmedOwner.sol";
 
-contract VRFV2PlusWrapperConsumerExample is VRFV2PlusWrapperConsumerBase, ConfirmedOwner {
+contract VRFV2_5_WrapperConsumerExample is VRFV2_5_WrapperConsumerBase, ConfirmedOwner {
   event WrappedRequestFulfilled(uint256 requestId, uint256[] randomWords, uint256 payment);
   event WrapperRequestMade(uint256 indexed requestId, uint256 paid);
 
@@ -20,7 +20,7 @@ contract VRFV2PlusWrapperConsumerExample is VRFV2PlusWrapperConsumerBase, Confir
   constructor(
     address _link,
     address _vrfV2Wrapper
-  ) ConfirmedOwner(msg.sender) VRFV2PlusWrapperConsumerBase(_link, _vrfV2Wrapper) {}
+  ) ConfirmedOwner(msg.sender) VRFV2_5_WrapperConsumerBase(_link, _vrfV2Wrapper) {}
 
   function makeRequest(
     uint32 _callbackGasLimit,
@@ -28,7 +28,7 @@ contract VRFV2PlusWrapperConsumerExample is VRFV2PlusWrapperConsumerBase, Confir
     uint32 _numWords
   ) external onlyOwner returns (uint256 requestId) {
     requestId = requestRandomness(_callbackGasLimit, _requestConfirmations, _numWords);
-    uint256 paid = VRF_V2_PLUS_WRAPPER.calculateRequestPrice(_callbackGasLimit);
+    uint256 paid = VRF_V2_5_WRAPPER.calculateRequestPrice(_callbackGasLimit);
     s_requests[requestId] = RequestStatus({paid: paid, randomWords: new uint256[](0), fulfilled: false, native: false});
     emit WrapperRequestMade(requestId, paid);
     return requestId;
@@ -40,7 +40,7 @@ contract VRFV2PlusWrapperConsumerExample is VRFV2PlusWrapperConsumerBase, Confir
     uint32 _numWords
   ) external onlyOwner returns (uint256 requestId) {
     requestId = requestRandomnessPayInNative(_callbackGasLimit, _requestConfirmations, _numWords);
-    uint256 paid = VRF_V2_PLUS_WRAPPER.calculateRequestPriceNative(_callbackGasLimit);
+    uint256 paid = VRF_V2_5_WRAPPER.calculateRequestPriceNative(_callbackGasLimit);
     s_requests[requestId] = RequestStatus({paid: paid, randomWords: new uint256[](0), fulfilled: false, native: true});
     emit WrapperRequestMade(requestId, paid);
     return requestId;

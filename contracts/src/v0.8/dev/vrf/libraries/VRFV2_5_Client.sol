@@ -2,7 +2,7 @@
 pragma solidity ^0.8.4;
 
 // End consumer library.
-library VRFV2PlusClient {
+library VRFV2_5_Client {
   // extraArgs will evolve to support new features
   bytes4 public constant EXTRA_ARGS_V1_TAG = bytes4(keccak256("VRF ExtraArgsV1"));
   struct ExtraArgsV1 {

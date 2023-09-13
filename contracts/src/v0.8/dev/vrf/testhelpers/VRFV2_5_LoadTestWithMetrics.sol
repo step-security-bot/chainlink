@@ -2,16 +2,16 @@
 pragma solidity ^0.8.0;
 
 import "../../../ChainSpecificUtil.sol";
-import "../../interfaces/IVRFCoordinatorV2Plus.sol";
-import "../VRFConsumerBaseV2Plus.sol";
+import "../../interfaces/IVRFCoordinatorV2_5.sol";
+import "../VRFConsumerBaseV2_5.sol";
 import "../../../shared/access/ConfirmedOwner.sol";
 
 /**
  * @title The VRFLoadTestExternalSubOwner contract.
  * @notice Allows making many VRF V2 randomness requests in a single transaction for load testing.
  */
-contract VRFV2PlusLoadTestWithMetrics is VRFConsumerBaseV2Plus {
-  IVRFCoordinatorV2Plus public immutable COORDINATOR;
+contract VRFV2_5_LoadTestWithMetrics is VRFConsumerBaseV2_5 {
+  IVRFCoordinatorV2_5 public immutable COORDINATOR;
 
   uint256 public s_responseCount;
   uint256 public s_requestCount;
@@ -32,8 +32,8 @@ contract VRFV2PlusLoadTestWithMetrics is VRFConsumerBaseV2Plus {
 
   mapping(uint256 => RequestStatus) /* requestId */ /* requestStatus */ public s_requests;
 
-  constructor(address _vrfCoordinator) VRFConsumerBaseV2Plus(_vrfCoordinator) {
-    COORDINATOR = IVRFCoordinatorV2Plus(_vrfCoordinator);
+  constructor(address _vrfCoordinator) VRFConsumerBaseV2_5(_vrfCoordinator) {
+    COORDINATOR = IVRFCoordinatorV2_5(_vrfCoordinator);
   }
 
   function fulfillRandomWords(uint256 _requestId, uint256[] memory _randomWords) internal override {
@@ -67,13 +67,13 @@ contract VRFV2PlusLoadTestWithMetrics is VRFConsumerBaseV2Plus {
     uint16 _requestCount
   ) external onlyOwner {
     for (uint16 i = 0; i < _requestCount; i++) {
-      VRFV2PlusClient.RandomWordsRequest memory req = VRFV2PlusClient.RandomWordsRequest({
+      VRFV2_5_Client.RandomWordsRequest memory req = VRFV2_5_Client.RandomWordsRequest({
         keyHash: _keyHash,
         subId: _subId,
         requestConfirmations: _requestConfirmations,
         callbackGasLimit: _callbackGasLimit,
         numWords: _numWords,
-        extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: _nativePayment}))
+        extraArgs: VRFV2_5_Client._argsToBytes(VRFV2_5_Client.ExtraArgsV1({nativePayment: _nativePayment}))
       });
       // Will revert if subscription is not funded.
       uint256 requestId = COORDINATOR.requestRandomWords(req);

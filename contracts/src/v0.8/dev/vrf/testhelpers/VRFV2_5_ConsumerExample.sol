@@ -2,15 +2,15 @@
 pragma solidity ^0.8.0;
 
 import "../../../shared/interfaces/LinkTokenInterface.sol";
-import "../../interfaces/IVRFCoordinatorV2Plus.sol";
-import "../VRFConsumerBaseV2Plus.sol";
+import "../../interfaces/IVRFCoordinatorV2_5.sol";
+import "../VRFConsumerBaseV2_5.sol";
 import "../../../shared/access/ConfirmedOwner.sol";
 
 /// @notice This contract is used for testing only and should not be used for production.
-contract VRFV2PlusConsumerExample is ConfirmedOwner, VRFConsumerBaseV2Plus {
+contract VRFV2_5_ConsumerExample is ConfirmedOwner, VRFConsumerBaseV2_5 {
   LinkTokenInterface public s_linkToken;
   uint256 public s_recentRequestId;
-  IVRFCoordinatorV2Plus public s_vrfCoordinatorApiV1;
+  IVRFCoordinatorV2_5 public s_vrfCoordinatorApiV1;
   uint256 public s_subId;
 
   struct Response {
@@ -21,8 +21,8 @@ contract VRFV2PlusConsumerExample is ConfirmedOwner, VRFConsumerBaseV2Plus {
   }
   mapping(uint256 /* request id */ => Response /* response */) public s_requests;
 
-  constructor(address vrfCoordinator, address link) VRFConsumerBaseV2Plus(vrfCoordinator) {
-    s_vrfCoordinatorApiV1 = IVRFCoordinatorV2Plus(vrfCoordinator);
+  constructor(address vrfCoordinator, address link) VRFConsumerBaseV2_5(vrfCoordinator) {
+    s_vrfCoordinatorApiV1 = IVRFCoordinatorV2_5(vrfCoordinator);
     s_linkToken = LinkTokenInterface(link);
   }
 
@@ -42,7 +42,7 @@ contract VRFV2PlusConsumerExample is ConfirmedOwner, VRFConsumerBaseV2Plus {
 
   function createSubscriptionAndFundNative() external payable {
     subscribe();
-    s_vrfCoordinatorApiV1.fundSubscriptionWithEth{value: msg.value}(s_subId);
+    s_vrfCoordinatorApiV1.fundSubscriptionWithNative{value: msg.value}(s_subId);
   }
 
   function createSubscriptionAndFund(uint96 amount) external {
@@ -58,7 +58,7 @@ contract VRFV2PlusConsumerExample is ConfirmedOwner, VRFConsumerBaseV2Plus {
 
   function topUpSubscriptionNative() external payable {
     require(s_subId != 0, "sub not set");
-    s_vrfCoordinatorApiV1.fundSubscriptionWithEth{value: msg.value}(s_subId);
+    s_vrfCoordinatorApiV1.fundSubscriptionWithNative{value: msg.value}(s_subId);
   }
 
   function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {
@@ -74,13 +74,13 @@ contract VRFV2PlusConsumerExample is ConfirmedOwner, VRFConsumerBaseV2Plus {
     bytes32 keyHash,
     bool nativePayment
   ) external {
-    VRFV2PlusClient.RandomWordsRequest memory req = VRFV2PlusClient.RandomWordsRequest({
+    VRFV2_5_Client.RandomWordsRequest memory req = VRFV2_5_Client.RandomWordsRequest({
       keyHash: keyHash,
       subId: s_subId,
       requestConfirmations: requestConfirmations,
       callbackGasLimit: callbackGasLimit,
       numWords: numWords,
-      extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: nativePayment}))
+      extraArgs: VRFV2_5_Client._argsToBytes(VRFV2_5_Client.ExtraArgsV1({nativePayment: nativePayment}))
     });
     uint256 requestId = s_vrfCoordinator.requestRandomWords(req);
     Response memory resp = Response({

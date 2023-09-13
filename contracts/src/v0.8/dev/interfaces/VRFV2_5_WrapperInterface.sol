@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-interface VRFV2PlusWrapperInterface {
+interface VRFV2_5_WrapperInterface {
   /**
-   * @return the request ID of the most recent VRF V2 request made by this wrapper. This should only
+   * @return the request ID of the most recent VRF V2_5 request made by this wrapper. This should only
    * be relied option within the same transaction that the request was made.
    */
   function lastRequestId() external view returns (uint256);
@@ -56,7 +56,7 @@ interface VRFV2PlusWrapperInterface {
   ) external view returns (uint256);
 
   /**
-   * @notice Requests randomness from the VRF V2 wrapper, paying in native token.
+   * @notice Requests randomness from the VRF V2_5 wrapper, paying in native token.
    *
    * @param _callbackGasLimit is the gas limit for the request.
    * @param _requestConfirmations number of request confirmations to wait before serving a request.
