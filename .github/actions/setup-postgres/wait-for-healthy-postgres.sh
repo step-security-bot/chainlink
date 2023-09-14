@@ -10,7 +10,7 @@ until [ $RETRIES -eq 0 ]; do
   elif [ "$JSON_TYPE" == "object" ]; then
     HEALTH_STATUS=$(echo "$DOCKER_OUTPUT" | jq -r '.Health')
   else
-    HEALTH_STATUS="Unknown JSON type: $JSON_TYPE"
+    HEALTH_STATUS="Unknown JSON type: $JSON_TYPE, output was: $DOCKER_OUTPUT"
   fi
 
   echo "postgres health status: $HEALTH_STATUS"
