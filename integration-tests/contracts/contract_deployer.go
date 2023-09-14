@@ -115,7 +115,7 @@ type ContractDeployer interface {
 	DeployKeeperGasWrapperMock() (KeeperGasWrapperMock, error)
 }
 
-// NewContractDeployer returns an instance of a contract deployer based on the client type
+// NewContractDeployer returns an instance of a contract deployer based on the client type.
 func NewContractDeployer(bcClient blockchain.EVMClient) (ContractDeployer, error) {
 	switch clientImpl := bcClient.Get().(type) {
 	case *blockchain.EthereumClient:
