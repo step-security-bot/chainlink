@@ -2,6 +2,9 @@ name: Operator UI CI
 on:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   check-gql:
     permissions:
@@ -13,9 +16,14 @@ jobs:
     name: Breaking Changes GQL Check
     runs-on: ubuntu-latest
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
+        with:
+          egress-policy: audit
+
       - name: Collect Metrics
         id: collect-gha-metrics
-        uses: smartcontractkit/push-gha-metrics-action@v1
+        uses: smartcontractkit/push-gha-metrics-action@b771c2b0a0bf6ded1d25781a6ba3742e24b5aa69 # v1
         with:
           basic-auth: ${{ secrets.GRAFANA_CLOUD_BASIC_AUTH }}
           hostname: ${{ secrets.GRAFANA_CLOUD_HOST }}
@@ -32,7 +40,7 @@ jobs:
 
       - name: Get Github Token
         id: get-gh-token
-        uses: smartcontractkit/chainlink-github-actions/github-app-token-issuer@main
+        uses: smartcontractkit/chainlink-github-actions/github-app-token-issuer@eccde1970eca69f079d3efb3409938a72ade8497 # main
         with:
           url: ${{ secrets.AWS_INFRA_RELENG_TOKEN_ISSUER_LAMBDA_URL }}
 
