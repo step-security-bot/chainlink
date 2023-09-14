@@ -1,7 +1,7 @@
 import { ethers, upgrades } from 'hardhat'
 import { expect } from 'chai'
 import { BigNumber, Contract, ContractFactory, Signer } from 'ethers'
-import { Roles, getUsers } from '../../../test-helpers/setup'
+import { getUsers, Roles } from '../../../test-helpers/setup'
 
 let functionsOracleFactory: ContractFactory
 let clientTestHelperFactory: ContractFactory
@@ -242,7 +242,7 @@ describe('FunctionsRegistryUpgradeable', () => {
 
     it('can be upgraded to the latest implementation', async () => {
       await migrateAndCheck(
-        'src/v0.8/functions/dev/0_0_0/FunctionsBillingRegistry.sol:FunctionsBillingRegistry',
+        'src/v0.8/functions/dev/v0_0_0/FunctionsBillingRegistry.sol:FunctionsBillingRegistry',
       )
     })
   })
