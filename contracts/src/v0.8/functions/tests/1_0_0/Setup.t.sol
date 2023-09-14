@@ -205,7 +205,7 @@ contract FunctionsClientRequestSetup is FunctionsSubscriptionSetup {
     FunctionsResponse.Commitment commitment;
   }
 
-  mapping(uint256 => Request) s_requests;
+  mapping(uint256 requestNumber => Request) s_requests;
 
   uint96 s_fulfillmentRouterOwnerBalance = 0;
   uint96 s_fulfillmentCoordinatorBalance = 0;
@@ -236,7 +236,8 @@ contract FunctionsClientRequestSetup is FunctionsSubscriptionSetup {
     bytes memory secrets,
     string[] memory args,
     bytes[] memory bytesArgs,
-    uint32 callbackGasLimit
+    uint32 callbackGasLimit,
+    address client
   ) internal {
     if (s_requests[requestNumberKey].requestId != bytes32(0)) {
       revert("Request already written");
@@ -244,7 +245,7 @@ contract FunctionsClientRequestSetup is FunctionsSubscriptionSetup {
 
     vm.recordLogs();
 
-    bytes32 requestId = s_functionsClient.sendRequest(
+    bytes32 requestId = FunctionsClientUpgradeHelper(client).sendRequest(
       s_donId,
       sourceCode,
       secrets,
@@ -271,6 +272,26 @@ contract FunctionsClientRequestSetup is FunctionsSubscriptionSetup {
       requestId: requestId,
       commitment: commitment
     });
+  }
+
+  /// @dev Overload to fill client with s_functionsClient
+  function _sendAndStoreRequest(
+    uint256 requestNumberKey,
+    string memory sourceCode,
+    bytes memory secrets,
+    string[] memory args,
+    bytes[] memory bytesArgs,
+    uint32 callbackGasLimit
+  ) internal {
+    _sendAndStoreRequest(
+      requestNumberKey,
+      sourceCode,
+      secrets,
+      args,
+      bytesArgs,
+      callbackGasLimit,
+      address(s_functionsClient)
+    );
   }
 
   function _buildReport(
