@@ -32,9 +32,9 @@ import (
 	evmtypes "github.com/smartcontractkit/chainlink/v2/core/chains/evm/types"
 	"github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/aggregator_v3_interface"
 	"github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/batch_vrf_coordinator_v2"
-	"github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/batch_vrf_coordinator_v2plus"
+	"github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/batch_vrf_coordinator_v2_5"
 	"github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_coordinator_v2"
-	"github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_coordinator_v2plus"
+	"github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_coordinator_v2_5"
 	"github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_owner"
 	"github.com/smartcontractkit/chainlink/v2/core/logger"
 	"github.com/smartcontractkit/chainlink/v2/core/services/job"
@@ -47,13 +47,13 @@ import (
 )
 
 var (
-	_                         log.Listener   = &listenerV2{}
-	_                         job.ServiceCtx = &listenerV2{}
-	coordinatorV2ABI                         = evmtypes.MustGetABI(vrf_coordinator_v2.VRFCoordinatorV2ABI)
-	coordinatorV2PlusABI                     = evmtypes.MustGetABI(vrf_coordinator_v2plus.VRFCoordinatorV2PlusABI)
-	batchCoordinatorV2ABI                    = evmtypes.MustGetABI(batch_vrf_coordinator_v2.BatchVRFCoordinatorV2ABI)
-	batchCoordinatorV2PlusABI                = evmtypes.MustGetABI(batch_vrf_coordinator_v2plus.BatchVRFCoordinatorV2PlusABI)
-	vrfOwnerABI                              = evmtypes.MustGetABI(vrf_owner.VRFOwnerMetaData.ABI)
+	_                       log.Listener   = &listenerV2{}
+	_                       job.ServiceCtx = &listenerV2{}
+	coordinatorV2ABI                       = evmtypes.MustGetABI(vrf_coordinator_v2.VRFCoordinatorV2ABI)
+	coordinatorV2_5ABI                     = evmtypes.MustGetABI(vrf_coordinator_v2_5.VRFCoordinatorV25ABI)
+	batchCoordinatorV2ABI                  = evmtypes.MustGetABI(batch_vrf_coordinator_v2.BatchVRFCoordinatorV2ABI)
+	batchCoordinatorV2_5ABI                = evmtypes.MustGetABI(batch_vrf_coordinator_v2_5.BatchVRFCoordinatorV25ABI)
+	vrfOwnerABI                            = evmtypes.MustGetABI(vrf_owner.VRFOwnerMetaData.ABI)
 )
 
 const (
@@ -79,7 +79,7 @@ const (
 		AND state IN ('unconfirmed', 'unstarted', 'in_progress')
 		GROUP BY meta->>'SubId'`
 
-	V2PlusReservedLinkQuery = `SELECT SUM(CAST(meta->>'MaxLink' AS NUMERIC(78, 0)))
+	V2_5ReservedLinkQuery = `SELECT SUM(CAST(meta->>'MaxLink' AS NUMERIC(78, 0)))
 		FROM evm.txes
 		WHERE meta->>'MaxLink' IS NOT NULL
 		AND evm_chain_id = $1
@@ -87,7 +87,7 @@ const (
 		AND state IN ('unconfirmed', 'unstarted', 'in_progress')
 		GROUP BY meta->>'GlobalSubId'`
 
-	V2PlusReservedEthQuery = `SELECT SUM(CAST(meta->>'MaxEth' AS NUMERIC(78, 0)))
+	V2_5ReservedNativeQuery = `SELECT SUM(CAST(meta->>'MaxEth' AS NUMERIC(78, 0)))
 		FROM evm.txes
 		WHERE meta->>'MaxEth' IS NOT NULL
 		AND evm_chain_id = $1
@@ -234,7 +234,7 @@ type listenerV2 struct {
 	// Wait group to wait on all goroutines to shut down.
 	wg *sync.WaitGroup
 
-	// aggregator client to get link/eth feed prices from chain. Can be nil for VRF V2 plus
+	// aggregator client to get link/eth feed prices from chain. Can be nil for VRF V2_5
 	aggregator aggregator_v3_interface.AggregatorV3InterfaceInterface
 
 	// deduper prevents processing duplicate requests from the log broadcaster.
@@ -454,9 +454,9 @@ func (lsn *listenerV2) processPendingVRFRequests(ctx context.Context) {
 		// is active solely by it's balance, since an active subscription could legitimately
 		// have a zero balance.
 		var (
-			startLinkBalance *big.Int
-			startEthBalance  *big.Int
-			subIsActive      bool
+			startLinkBalance   *big.Int
+			startNativeBalance *big.Int
+			subIsActive        bool
 		)
 		sID, ok := new(big.Int).SetString(subID, 10)
 		if !ok {
@@ -486,8 +486,8 @@ func (lsn *listenerV2) processPendingVRFRequests(ctx context.Context) {
 		} else {
 			// Happy path - sub is active.
 			startLinkBalance = sub.Balance()
-			if sub.Version() == vrfcommon.V2Plus {
-				startEthBalance = sub.EthBalance()
+			if sub.Version() == vrfcommon.V2_5 {
+				startNativeBalance = sub.NativeBalance()
 			}
 			subIsActive = true
 		}
@@ -501,7 +501,7 @@ func (lsn *listenerV2) processPendingVRFRequests(ctx context.Context) {
 			return a.req.CallbackGasLimit() < b.req.CallbackGasLimit()
 		})
 
-		p := lsn.processRequestsPerSub(ctx, sID, startLinkBalance, startEthBalance, reqs, subIsActive)
+		p := lsn.processRequestsPerSub(ctx, sID, startLinkBalance, startNativeBalance, reqs, subIsActive)
 		for reqID := range p {
 			processed[reqID] = struct{}{}
 		}
@@ -517,8 +517,8 @@ func MaybeSubtractReservedLink(q pg.Q, startBalance *big.Int, chainID uint64, su
 		reservedLink string
 		query        string
 	)
-	if vrfVersion == vrfcommon.V2Plus {
-		query = V2PlusReservedLinkQuery
+	if vrfVersion == vrfcommon.V2_5 {
+		query = V2_5ReservedLinkQuery
 	} else if vrfVersion == vrfcommon.V2 {
 		query = V2ReservedLinkQuery
 	} else {
@@ -542,34 +542,34 @@ func MaybeSubtractReservedLink(q pg.Q, startBalance *big.Int, chainID uint64, su
 	return new(big.Int).Set(startBalance), nil
 }
 
-// MaybeSubtractReservedEth figures out how much ether is reserved for other VRF requests that
+// MaybeSubtractReservedNative figures out how much native is reserved for other VRF requests that
 // have not been fully confirmed yet on-chain, and subtracts that from the given startBalance,
 // and returns that value if there are no errors.
-func MaybeSubtractReservedEth(q pg.Q, startBalance *big.Int, chainID uint64, subID *big.Int, vrfVersion vrfcommon.Version) (*big.Int, error) {
+func MaybeSubtractReservedNative(q pg.Q, startBalance *big.Int, chainID uint64, subID *big.Int, vrfVersion vrfcommon.Version) (*big.Int, error) {
 	var (
-		reservedEther string
-		query         string
+		reservedNative string
+		query          string
 	)
-	if vrfVersion == vrfcommon.V2Plus {
-		query = V2PlusReservedEthQuery
+	if vrfVersion == vrfcommon.V2_5 {
+		query = V2_5ReservedNativeQuery
 	} else if vrfVersion == vrfcommon.V2 {
-		// native payment is not supported for v2, so returning 0 reserved ETH
+		// native payment is not supported for v2, so returning 0 reserved native
 		return big.NewInt(0), nil
 	} else {
 		return nil, errors.Errorf("unsupported vrf version %s", vrfVersion)
 	}
-	err := q.Get(&reservedEther, query, chainID, subID.String())
+	err := q.Get(&reservedNative, query, chainID, subID.String())
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return nil, errors.Wrap(err, "getting reserved ether")
+		return nil, errors.Wrap(err, "getting reserved native")
 	}
 
-	if reservedEther != "" {
-		reservedEtherInt, success := big.NewInt(0).SetString(reservedEther, 10)
+	if reservedNative != "" {
+		reservedNativeInt, success := big.NewInt(0).SetString(reservedNative, 10)
 		if !success {
-			return nil, fmt.Errorf("converting reserved ether %s", reservedEther)
+			return nil, fmt.Errorf("converting reserved native %s", reservedNative)
 		}
 
-		return new(big.Int).Sub(startBalance, reservedEtherInt), nil
+		return new(big.Int).Sub(startBalance, reservedNativeInt), nil
 	}
 
 	if startBalance != nil {
@@ -799,7 +799,7 @@ func (lsn *listenerV2) processRequestsPerSubBatch(
 	ctx context.Context,
 	subID *big.Int,
 	startLinkBalance *big.Int,
-	startEthBalance *big.Int,
+	startNativeBalance *big.Int,
 	reqs []pendingRequest,
 	subIsActive bool,
 ) map[string]struct{} {
@@ -810,10 +810,10 @@ func (lsn *listenerV2) processRequestsPerSubBatch(
 		lsn.l.Errorw("Couldn't get reserved LINK for subscription", "sub", reqs[0].req.SubID(), "err", err)
 		return processed
 	}
-	startBalanceNoReserveEth, err := MaybeSubtractReservedEth(
-		lsn.q, startEthBalance, lsn.chainID.Uint64(), subID, lsn.coordinator.Version())
+	startBalanceNoReserveNative, err := MaybeSubtractReservedNative(
+		lsn.q, startNativeBalance, lsn.chainID.Uint64(), subID, lsn.coordinator.Version())
 	if err != nil {
-		lsn.l.Errorw("Couldn't get reserved ether for subscription", "sub", reqs[0].req.SubID(), "err", err)
+		lsn.l.Errorw("Couldn't get reserved native for subscription", "sub", reqs[0].req.SubID(), "err", err)
 		return processed
 	}
 
@@ -835,7 +835,7 @@ func (lsn *listenerV2) processRequestsPerSubBatch(
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		nativeProcessed = lsn.processRequestsPerSubBatchHelper(ctx, subID, startEthBalance, startBalanceNoReserveEth, nativeRequests, subIsActive, true)
+		nativeProcessed = lsn.processRequestsPerSubBatchHelper(ctx, subID, startNativeBalance, startBalanceNoReserveNative, nativeRequests, subIsActive, true)
 	}()
 	go func() {
 		defer wg.Done()
@@ -1110,7 +1110,7 @@ func (lsn *listenerV2) processRequestsPerSubHelper(
 					txMetaSubID       *uint64
 					txMetaGlobalSubID *string
 				)
-				if lsn.coordinator.Version() == vrfcommon.V2Plus {
+				if lsn.coordinator.Version() == vrfcommon.V2_5 {
 					txMetaGlobalSubID = ptr(p.req.req.SubID().String())
 				} else if lsn.coordinator.Version() == vrfcommon.V2 {
 					txMetaSubID = ptr(p.req.req.SubID().Uint64())
@@ -1161,19 +1161,19 @@ func (lsn *listenerV2) transmitCheckerType() txmgrtypes.TransmitCheckerType {
 	if lsn.coordinator.Version() == vrfcommon.V2 {
 		return txmgr.TransmitCheckerTypeVRFV2
 	}
-	return txmgr.TransmitCheckerTypeVRFV2Plus
+	return txmgr.TransmitCheckerTypeVRFV2_5
 }
 
 func (lsn *listenerV2) processRequestsPerSub(
 	ctx context.Context,
 	subID *big.Int,
 	startLinkBalance *big.Int,
-	startEthBalance *big.Int,
+	startNativeBalance *big.Int,
 	reqs []pendingRequest,
 	subIsActive bool,
 ) map[string]struct{} {
 	if lsn.job.VRFSpec.BatchFulfillmentEnabled && lsn.batchCoordinator != nil {
-		return lsn.processRequestsPerSubBatch(ctx, subID, startLinkBalance, startEthBalance, reqs, subIsActive)
+		return lsn.processRequestsPerSubBatch(ctx, subID, startLinkBalance, startNativeBalance, reqs, subIsActive)
 	}
 
 	var processed = make(map[string]struct{})
@@ -1184,10 +1184,10 @@ func (lsn *listenerV2) processRequestsPerSub(
 		lsn.l.Errorw("Couldn't get reserved LINK for subscription", "sub", reqs[0].req.SubID(), "err", err)
 		return processed
 	}
-	startBalanceNoReserveEth, err := MaybeSubtractReservedEth(
-		lsn.q, startEthBalance, lsn.chainID.Uint64(), subID, lsn.coordinator.Version())
+	startBalanceNoReserveNative, err := MaybeSubtractReservedNative(
+		lsn.q, startNativeBalance, lsn.chainID.Uint64(), subID, lsn.coordinator.Version())
 	if err != nil {
-		lsn.l.Errorw("Couldn't get reserved ETH for subscription", "sub", reqs[0].req.SubID(), "err", err)
+		lsn.l.Errorw("Couldn't get reserved native for subscription", "sub", reqs[0].req.SubID(), "err", err)
 		return processed
 	}
 
@@ -1214,8 +1214,8 @@ func (lsn *listenerV2) processRequestsPerSub(
 		nativeProcessed = lsn.processRequestsPerSubHelper(
 			ctx,
 			subID,
-			startEthBalance,
-			startBalanceNoReserveEth,
+			startNativeBalance,
+			startBalanceNoReserveNative,
 			nativeRequests,
 			subIsActive,
 			true)
@@ -1244,8 +1244,8 @@ func (lsn *listenerV2) processRequestsPerSub(
 }
 
 func (lsn *listenerV2) requestCommitmentPayload(requestID *big.Int) (payload []byte, err error) {
-	if lsn.coordinator.Version() == vrfcommon.V2Plus {
-		return coordinatorV2PlusABI.Pack("s_requestCommitments", requestID)
+	if lsn.coordinator.Version() == vrfcommon.V2_5 {
+		return coordinatorV2_5ABI.Pack("s_requestCommitments", requestID)
 	} else if lsn.coordinator.Version() == vrfcommon.V2 {
 		return coordinatorV2ABI.Pack("getCommitment", requestID)
 	}
@@ -1365,7 +1365,7 @@ func (lsn *listenerV2) estimateFee(
 	maxGasPriceWei *assets.Wei,
 ) (*big.Int, error) {
 	// NativePayment() returns true if and only if the version is V2+ and the
-	// request was made in ETH.
+	// request was made in native.
 	if req.NativePayment() {
 		return EstimateFeeWei(req.CallbackGasLimit(), maxGasPriceWei.ToInt())
 	}
@@ -1486,10 +1486,10 @@ func (lsn *listenerV2) simulateFulfillment(
 			res.reqCommitment = NewRequestCommitment(m["requestCommitment"])
 		}
 
-		if trr.Task.Type() == pipeline.TaskTypeVRFV2Plus {
+		if trr.Task.Type() == pipeline.TaskTypeVRFV2_5 {
 			m := trr.Result.Value.(map[string]interface{})
 			res.payload = m["output"].(string)
-			res.proof = FromV2PlusProof(m["proof"].(vrf_coordinator_v2plus.VRFProof))
+			res.proof = FromV2_5Proof(m["proof"].(vrf_coordinator_v2_5.VRFProof))
 			res.reqCommitment = NewRequestCommitment(m["requestCommitment"])
 		}
 
@@ -1591,7 +1591,7 @@ func (lsn *listenerV2) handleLog(lb log.Broadcast, minConfs uint32) {
 		return
 	}
 
-	if v, ok := lb.DecodedLog().(*vrf_coordinator_v2plus.VRFCoordinatorV2PlusRandomWordsFulfilled); ok {
+	if v, ok := lb.DecodedLog().(*vrf_coordinator_v2_5.VRFCoordinatorV25RandomWordsFulfilled); ok {
 		lsn.l.Debugw("Received fulfilled log", "reqID", v.RequestId, "success", v.Success)
 		consumed, err := lsn.logBroadcaster.WasAlreadyConsumed(lb)
 		if err != nil {

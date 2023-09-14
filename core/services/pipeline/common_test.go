@@ -149,7 +149,7 @@ func TestUnmarshalTaskFromMap(t *testing.T) {
 		{pipeline.TaskTypeAny, &pipeline.AnyTask{}},
 		{pipeline.TaskTypeVRF, &pipeline.VRFTask{}},
 		{pipeline.TaskTypeVRFV2, &pipeline.VRFTaskV2{}},
-		{pipeline.TaskTypeVRFV2Plus, &pipeline.VRFTaskV2Plus{}},
+		{pipeline.TaskTypeVRFV2_5, &pipeline.VRFTaskV2_5{}},
 		{pipeline.TaskTypeEstimateGasLimit, &pipeline.EstimateGasLimitTask{}},
 		{pipeline.TaskTypeETHCall, &pipeline.ETHCallTask{}},
 		{pipeline.TaskTypeETHTx, &pipeline.ETHTxTask{}},

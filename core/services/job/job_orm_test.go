@@ -256,7 +256,7 @@ func TestORM(t *testing.T) {
 		require.Equal(t, jb.BlockhashStoreSpec.ID, savedJob.BlockhashStoreSpec.ID)
 		require.Equal(t, jb.BlockhashStoreSpec.CoordinatorV1Address, savedJob.BlockhashStoreSpec.CoordinatorV1Address)
 		require.Equal(t, jb.BlockhashStoreSpec.CoordinatorV2Address, savedJob.BlockhashStoreSpec.CoordinatorV2Address)
-		require.Equal(t, jb.BlockhashStoreSpec.CoordinatorV2PlusAddress, savedJob.BlockhashStoreSpec.CoordinatorV2PlusAddress)
+		require.Equal(t, jb.BlockhashStoreSpec.CoordinatorV2_5Address, savedJob.BlockhashStoreSpec.CoordinatorV2_5Address)
 		require.Equal(t, jb.BlockhashStoreSpec.WaitBlocks, savedJob.BlockhashStoreSpec.WaitBlocks)
 		require.Equal(t, jb.BlockhashStoreSpec.LookbackBlocks, savedJob.BlockhashStoreSpec.LookbackBlocks)
 		require.Equal(t, jb.BlockhashStoreSpec.BlockhashStoreAddress, savedJob.BlockhashStoreSpec.BlockhashStoreAddress)
@@ -286,7 +286,7 @@ func TestORM(t *testing.T) {
 		require.Equal(t, jb.BlockHeaderFeederSpec.ID, savedJob.BlockHeaderFeederSpec.ID)
 		require.Equal(t, jb.BlockHeaderFeederSpec.CoordinatorV1Address, savedJob.BlockHeaderFeederSpec.CoordinatorV1Address)
 		require.Equal(t, jb.BlockHeaderFeederSpec.CoordinatorV2Address, savedJob.BlockHeaderFeederSpec.CoordinatorV2Address)
-		require.Equal(t, jb.BlockHeaderFeederSpec.CoordinatorV2PlusAddress, savedJob.BlockHeaderFeederSpec.CoordinatorV2PlusAddress)
+		require.Equal(t, jb.BlockHeaderFeederSpec.CoordinatorV2_5Address, savedJob.BlockHeaderFeederSpec.CoordinatorV2_5Address)
 		require.Equal(t, jb.BlockHeaderFeederSpec.WaitBlocks, savedJob.BlockHeaderFeederSpec.WaitBlocks)
 		require.Equal(t, jb.BlockHeaderFeederSpec.LookbackBlocks, savedJob.BlockHeaderFeederSpec.LookbackBlocks)
 		require.Equal(t, jb.BlockHeaderFeederSpec.BlockhashStoreAddress, savedJob.BlockHeaderFeederSpec.BlockhashStoreAddress)
@@ -490,7 +490,7 @@ func TestORM_CreateJob_VRFV2(t *testing.T) {
 	cltest.AssertCount(t, db, "jobs", 0)
 }
 
-func TestORM_CreateJob_VRFV2Plus(t *testing.T) {
+func TestORM_CreateJob_VRFV2_5(t *testing.T) {
 	config := configtest.NewTestGeneralConfig(t)
 	db := pgtest.NewSqlxDB(t)
 	keyStore := cltest.NewKeyStore(t, db, config.Database())
@@ -506,7 +506,7 @@ func TestORM_CreateJob_VRFV2Plus(t *testing.T) {
 	fromAddresses := []string{cltest.NewEIP55Address().String(), cltest.NewEIP55Address().String()}
 	jb, err := vrfcommon.ValidatedVRFSpec(testspecs.GenerateVRFSpec(
 		testspecs.VRFSpecParams{
-			VRFVersion:          vrfcommon.V2Plus,
+			VRFVersion:          vrfcommon.V2_5,
 			RequestedConfsDelay: 10,
 			FromAddresses:       fromAddresses,
 			ChunkSize:           25,
@@ -558,7 +558,7 @@ func TestORM_CreateJob_VRFV2Plus(t *testing.T) {
 	cltest.AssertCount(t, db, "jobs", 0)
 
 	jb, err = vrfcommon.ValidatedVRFSpec(testspecs.GenerateVRFSpec(testspecs.VRFSpecParams{
-		VRFVersion:     vrfcommon.V2Plus,
+		VRFVersion:     vrfcommon.V2_5,
 		RequestTimeout: 1 * time.Hour,
 		FromAddresses:  fromAddresses,
 	}).Toml())

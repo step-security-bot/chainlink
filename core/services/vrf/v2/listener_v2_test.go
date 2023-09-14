@@ -16,7 +16,7 @@ import (
 	"github.com/smartcontractkit/sqlx"
 
 	"github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_coordinator_v2"
-	"github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_coordinator_v2plus"
+	"github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_coordinator_v2_5"
 	"github.com/smartcontractkit/chainlink/v2/core/services/job"
 	"github.com/smartcontractkit/chainlink/v2/core/services/vrf/vrfcommon"
 
@@ -52,7 +52,7 @@ func txMetaSubIDs(t *testing.T, vrfVersion vrfcommon.Version, subID *big.Int) (*
 		txMetaSubID       *uint64
 		txMetaGlobalSubID *string
 	)
-	if vrfVersion == vrfcommon.V2Plus {
+	if vrfVersion == vrfcommon.V2_5 {
 		txMetaGlobalSubID = ptr(subID.String())
 	} else if vrfVersion == vrfcommon.V2 {
 		txMetaSubID = ptr(subID.Uint64())
@@ -211,8 +211,8 @@ func TestMaybeSubtractReservedLinkV2(t *testing.T) {
 	testMaybeSubtractReservedLink(t, vrfcommon.V2)
 }
 
-func TestMaybeSubtractReservedLinkV2Plus(t *testing.T) {
-	testMaybeSubtractReservedLink(t, vrfcommon.V2Plus)
+func TestMaybeSubtractReservedLinkV2_5(t *testing.T) {
+	testMaybeSubtractReservedLink(t, vrfcommon.V2_5)
 }
 
 func testMaybeSubtractReservedNative(t *testing.T, vrfVersion vrfcommon.Version) {
@@ -274,8 +274,8 @@ func testMaybeSubtractReservedNative(t *testing.T, vrfVersion vrfcommon.Version)
 	require.Equal(t, "70000", start.String())
 }
 
-func TestMaybeSubtractReservedNativeV2Plus(t *testing.T) {
-	testMaybeSubtractReservedNative(t, vrfcommon.V2Plus)
+func TestMaybeSubtractReservedNativeV2_5(t *testing.T) {
+	testMaybeSubtractReservedNative(t, vrfcommon.V2_5)
 }
 
 func TestMaybeSubtractReservedNativeV2(t *testing.T) {
@@ -461,14 +461,14 @@ func TestListener_handleLog(tt *testing.T) {
 		require.Equal(t, req.reqID, "6")
 	})
 
-	tt.Run("v2 plus", func(t *testing.T) {
+	tt.Run("v2_5", func(t *testing.T) {
 		j, err := vrfcommon.ValidatedVRFSpec(testspecs.GenerateVRFSpec(testspecs.VRFSpecParams{
-			VRFVersion:          vrfcommon.V2Plus,
+			VRFVersion:          vrfcommon.V2_5,
 			RequestedConfsDelay: 10,
 			FromAddresses:       []string{"0xF2982b7Ef6E3D8BB738f8Ea20502229781f6Ad97"},
 		}).Toml())
 		require.NoError(t, err)
-		fulfilledLog := vrf_coordinator_v2plus.VRFCoordinatorV2PlusRandomWordsFulfilled{
+		fulfilledLog := vrf_coordinator_v2_5.VRFCoordinatorV25RandomWordsFulfilled{
 			RequestId: big.NewInt(requestID),
 			Raw:       types.Log{BlockNumber: blockNumber},
 		}

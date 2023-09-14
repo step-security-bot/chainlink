@@ -11,7 +11,7 @@ import (
 	"github.com/smartcontractkit/chainlink/v2/core/chains/evm/logpoller"
 	v1 "github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/solidity_vrf_coordinator_interface"
 	v2 "github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_coordinator_v2"
-	v2plus "github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_coordinator_v2plus"
+	v2_5 "github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_coordinator_v2_5"
 	"github.com/smartcontractkit/chainlink/v2/core/services/pg"
 )
 
@@ -19,7 +19,7 @@ var (
 	_ Coordinator = MultiCoordinator{}
 	_ Coordinator = &V1Coordinator{}
 	_ Coordinator = &V2Coordinator{}
-	_ Coordinator = &V2PlusCoordinator{}
+	_ Coordinator = &V2_5Coordinator{}
 )
 
 // MultiCoordinator combines the data from multiple coordinators.
@@ -244,19 +244,19 @@ func (v *V2Coordinator) Fulfillments(ctx context.Context, fromBlock uint64) ([]E
 	return fuls, nil
 }
 
-// V2PlusCoordinator fetches request and fulfillment logs from a VRF V2Plus coordinator contract.
-type V2PlusCoordinator struct {
-	c  v2plus.VRFCoordinatorV2PlusInterface
+// V2_5Coordinator fetches request and fulfillment logs from a VRF V2_5 coordinator contract.
+type V2_5Coordinator struct {
+	c  v2_5.VRFCoordinatorV25Interface
 	lp logpoller.LogPoller
 }
 
 // NewV2Coordinator creates a new V2Coordinator from the given contract.
-func NewV2PlusCoordinator(c v2plus.VRFCoordinatorV2PlusInterface, lp logpoller.LogPoller) (*V2PlusCoordinator, error) {
+func NewV2_5Coordinator(c v2_5.VRFCoordinatorV25Interface, lp logpoller.LogPoller) (*V2_5Coordinator, error) {
 	err := lp.RegisterFilter(logpoller.Filter{
-		Name: logpoller.FilterName("VRFv2PlusCoordinatorFeeder", c.Address()),
+		Name: logpoller.FilterName("VRFv2_5CoordinatorFeeder", c.Address()),
 		EventSigs: []common.Hash{
-			v2plus.VRFCoordinatorV2PlusRandomWordsRequested{}.Topic(),
-			v2plus.VRFCoordinatorV2PlusRandomWordsFulfilled{}.Topic(),
+			v2_5.VRFCoordinatorV25RandomWordsRequested{}.Topic(),
+			v2_5.VRFCoordinatorV25RandomWordsFulfilled{}.Topic(),
 		}, Addresses: []common.Address{c.Address()},
 	})
 
@@ -264,11 +264,11 @@ func NewV2PlusCoordinator(c v2plus.VRFCoordinatorV2PlusInterface, lp logpoller.L
 		return nil, err
 	}
 
-	return &V2PlusCoordinator{c, lp}, err
+	return &V2_5Coordinator{c, lp}, err
 }
 
 // Requests satisfies the Coordinator interface.
-func (v *V2PlusCoordinator) Requests(
+func (v *V2_5Coordinator) Requests(
 	ctx context.Context,
 	fromBlock uint64,
 	toBlock uint64,
@@ -277,7 +277,7 @@ func (v *V2PlusCoordinator) Requests(
 		int64(fromBlock),
 		int64(toBlock),
 		[]common.Hash{
-			v2plus.VRFCoordinatorV2PlusRandomWordsRequested{}.Topic(),
+			v2_5.VRFCoordinatorV25RandomWordsRequested{}.Topic(),
 		},
 		v.c.Address(),
 		pg.WithParentCtx(ctx))
@@ -291,7 +291,7 @@ func (v *V2PlusCoordinator) Requests(
 		if err != nil {
 			continue // malformed log should not break flow
 		}
-		request, ok := requestLog.(*v2plus.VRFCoordinatorV2PlusRandomWordsRequested)
+		request, ok := requestLog.(*v2_5.VRFCoordinatorV25RandomWordsRequested)
 		if !ok {
 			continue // malformed log should not break flow
 		}
@@ -302,7 +302,7 @@ func (v *V2PlusCoordinator) Requests(
 }
 
 // Fulfillments satisfies the Coordinator interface.
-func (v *V2PlusCoordinator) Fulfillments(ctx context.Context, fromBlock uint64) ([]Event, error) {
+func (v *V2_5Coordinator) Fulfillments(ctx context.Context, fromBlock uint64) ([]Event, error) {
 	toBlock, err := v.lp.LatestBlock(pg.WithParentCtx(ctx))
 	if err != nil {
 		return nil, errors.Wrap(err, "fetching latest block")
@@ -312,7 +312,7 @@ func (v *V2PlusCoordinator) Fulfillments(ctx context.Context, fromBlock uint64) 
 		int64(fromBlock),
 		int64(toBlock),
 		[]common.Hash{
-			v2plus.VRFCoordinatorV2PlusRandomWordsFulfilled{}.Topic(),
+			v2_5.VRFCoordinatorV25RandomWordsFulfilled{}.Topic(),
 		},
 		v.c.Address(),
 		pg.WithParentCtx(ctx))
@@ -326,7 +326,7 @@ func (v *V2PlusCoordinator) Fulfillments(ctx context.Context, fromBlock uint64) 
 		if err != nil {
 			continue // malformed log should not break flow
 		}
-		request, ok := requestLog.(*v2plus.VRFCoordinatorV2PlusRandomWordsFulfilled)
+		request, ok := requestLog.(*v2_5.VRFCoordinatorV25RandomWordsFulfilled)
 		if !ok {
 			continue // malformed log should not break flow
 		}

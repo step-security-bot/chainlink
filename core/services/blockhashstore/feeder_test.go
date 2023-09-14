@@ -20,15 +20,15 @@ import (
 
 	"github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/solidity_vrf_coordinator_interface"
 	"github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_coordinator_v2"
-	"github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_coordinator_v2plus"
+	"github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_coordinator_v2_5"
 	"github.com/smartcontractkit/chainlink/v2/core/internal/testutils"
 	"github.com/smartcontractkit/chainlink/v2/core/logger"
 )
 
 const (
 	// VRF-only events.
-	randomWordsRequestedV2Plus          string = "RandomWordsRequested"
-	randomWordsFulfilledV2Plus          string = "RandomWordsFulfilled"
+	randomWordsRequestedV2_5            string = "RandomWordsRequested"
+	randomWordsFulfilledV2_5            string = "RandomWordsFulfilled"
 	randomWordsRequestedV2              string = "RandomWordsRequested"
 	randomWordsFulfilledV2              string = "RandomWordsFulfilled"
 	randomWordsRequestedV1              string = "RandomnessRequest"
@@ -40,9 +40,9 @@ const (
 )
 
 var (
-	vrfCoordinatorV2PlusABI = evmtypes.MustGetABI(vrf_coordinator_v2plus.VRFCoordinatorV2PlusMetaData.ABI)
-	vrfCoordinatorV2ABI     = evmtypes.MustGetABI(vrf_coordinator_v2.VRFCoordinatorV2MetaData.ABI)
-	vrfCoordinatorV1ABI     = evmtypes.MustGetABI(solidity_vrf_coordinator_interface.VRFCoordinatorMetaData.ABI)
+	vrfCoordinatorV2_5ABI = evmtypes.MustGetABI(vrf_coordinator_v2_5.VRFCoordinatorV25MetaData.ABI)
+	vrfCoordinatorV2ABI   = evmtypes.MustGetABI(vrf_coordinator_v2.VRFCoordinatorV2MetaData.ABI)
+	vrfCoordinatorV1ABI   = evmtypes.MustGetABI(solidity_vrf_coordinator_interface.VRFCoordinatorMetaData.ABI)
 
 	_     Coordinator = &TestCoordinator{}
 	_     BHS         = &TestBHS{}
@@ -459,7 +459,7 @@ func TestFeederWithLogPollerVRFv2(t *testing.T) {
 	}
 }
 
-func TestFeederWithLogPollerVRFv2Plus(t *testing.T) {
+func TestFeederWithLogPollerVRFv2_5(t *testing.T) {
 
 	var coordinatorAddress = common.HexToAddress("0x514910771AF9Ca656af840dff83E8264EcF986CA")
 
@@ -468,9 +468,9 @@ func TestFeederWithLogPollerVRFv2Plus(t *testing.T) {
 			// Instantiate log poller & coordinator.
 			lp := &mocklp.LogPoller{}
 			lp.On("RegisterFilter", mock.Anything).Return(nil)
-			c, err := vrf_coordinator_v2plus.NewVRFCoordinatorV2Plus(coordinatorAddress, nil)
+			c, err := vrf_coordinator_v2_5.NewVRFCoordinatorV25(coordinatorAddress, nil)
 			require.NoError(t, err)
-			coordinator := &V2PlusCoordinator{
+			coordinator := &V2_5Coordinator{
 				c:  c,
 				lp: lp,
 			}
@@ -490,7 +490,7 @@ func TestFeederWithLogPollerVRFv2Plus(t *testing.T) {
 				require.True(t, ok)
 				requestLogs = append(
 					requestLogs,
-					newRandomnessRequestedLogV2Plus(t, r.Block, reqId, coordinatorAddress),
+					newRandomnessRequestedLogV2_5(t, r.Block, reqId, coordinatorAddress),
 				)
 			}
 
@@ -501,7 +501,7 @@ func TestFeederWithLogPollerVRFv2Plus(t *testing.T) {
 				require.True(t, ok)
 				fulfillmentLogs = append(
 					fulfillmentLogs,
-					newRandomnessFulfilledLogV2Plus(t, r.Block, reqId, coordinatorAddress),
+					newRandomnessFulfilledLogV2_5(t, r.Block, reqId, coordinatorAddress),
 				)
 			}
 
@@ -513,7 +513,7 @@ func TestFeederWithLogPollerVRFv2Plus(t *testing.T) {
 				fromBlock,
 				toBlock,
 				[]common.Hash{
-					vrf_coordinator_v2plus.VRFCoordinatorV2PlusRandomWordsRequested{}.Topic(),
+					vrf_coordinator_v2_5.VRFCoordinatorV25RandomWordsRequested{}.Topic(),
 				},
 				coordinatorAddress,
 				mock.Anything,
@@ -523,7 +523,7 @@ func TestFeederWithLogPollerVRFv2Plus(t *testing.T) {
 				fromBlock,
 				latest,
 				[]common.Hash{
-					vrf_coordinator_v2plus.VRFCoordinatorV2PlusRandomWordsFulfilled{}.Topic(),
+					vrf_coordinator_v2_5.VRFCoordinatorV25RandomWordsFulfilled{}.Topic(),
 				},
 				coordinatorAddress,
 				mock.Anything,
@@ -827,13 +827,13 @@ func newRandomnessFulfilledLogV2(
 	return lg
 }
 
-func newRandomnessRequestedLogV2Plus(
+func newRandomnessRequestedLogV2_5(
 	t *testing.T,
 	requestBlock uint64,
 	requestID *big.Int,
 	coordinatorAddress common.Address,
 ) logpoller.Log {
-	e := vrf_coordinator_v2plus.VRFCoordinatorV2PlusRandomWordsRequested{
+	e := vrf_coordinator_v2_5.VRFCoordinatorV25RandomWordsRequested{
 		RequestId:                   requestID,
 		PreSeed:                     big.NewInt(0),
 		MinimumRequestConfirmations: 0,
@@ -847,7 +847,7 @@ func newRandomnessRequestedLogV2Plus(
 		},
 	}
 	var unindexed abi.Arguments
-	for _, a := range vrfCoordinatorV2PlusABI.Events[randomWordsRequestedV2Plus].Inputs {
+	for _, a := range vrfCoordinatorV2_5ABI.Events[randomWordsRequestedV2_5].Inputs {
 		if !a.Indexed {
 			unindexed = append(unindexed, a)
 		}
@@ -895,7 +895,7 @@ func newRandomnessRequestedLogV2Plus(
 	topic3, err := senderArg.Pack(e.Sender)
 	require.NoError(t, err)
 
-	topic0 := vrfCoordinatorV2PlusABI.Events[randomWordsRequestedV2Plus].ID
+	topic0 := vrfCoordinatorV2_5ABI.Events[randomWordsRequestedV2_5].ID
 	lg := logpoller.Log{
 		Address: coordinatorAddress,
 		Data:    nonIndexedData,
@@ -915,13 +915,13 @@ func newRandomnessRequestedLogV2Plus(
 	return lg
 }
 
-func newRandomnessFulfilledLogV2Plus(
+func newRandomnessFulfilledLogV2_5(
 	t *testing.T,
 	requestBlock uint64,
 	requestID *big.Int,
 	coordinatorAddress common.Address,
 ) logpoller.Log {
-	e := vrf_coordinator_v2plus.VRFCoordinatorV2PlusRandomWordsFulfilled{
+	e := vrf_coordinator_v2_5.VRFCoordinatorV25RandomWordsFulfilled{
 		RequestId:  requestID,
 		OutputSeed: big.NewInt(0),
 		Payment:    big.NewInt(0),
@@ -929,10 +929,10 @@ func newRandomnessFulfilledLogV2Plus(
 		Raw: types.Log{
 			BlockNumber: requestBlock,
 		},
-		SubID: big.NewInt(0),
+		SubId: big.NewInt(0),
 	}
 	var unindexed abi.Arguments
-	for _, a := range vrfCoordinatorV2PlusABI.Events[randomWordsFulfilledV2Plus].Inputs {
+	for _, a := range vrfCoordinatorV2_5ABI.Events[randomWordsFulfilledV2_5].Inputs {
 		if !a.Indexed {
 			unindexed = append(unindexed, a)
 		}
@@ -962,10 +962,10 @@ func newRandomnessFulfilledLogV2Plus(
 
 	topic1, err := requestIdArg.Pack(e.RequestId)
 	require.NoError(t, err)
-	topic2, err := subIdArg.Pack(e.SubID)
+	topic2, err := subIdArg.Pack(e.SubId)
 	require.NoError(t, err)
 
-	topic0 := vrfCoordinatorV2PlusABI.Events[randomWordsFulfilledV2Plus].ID
+	topic0 := vrfCoordinatorV2_5ABI.Events[randomWordsFulfilledV2_5].ID
 	lg := logpoller.Log{
 		Address: coordinatorAddress,
 		Data:    nonIndexedData,

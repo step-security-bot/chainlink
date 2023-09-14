@@ -676,7 +676,7 @@ func Test_FromAddressMaxGasPricesAllEqual(t *testing.T) {
 	})
 }
 
-func Test_VRFV2PlusServiceFailsWhenVRFOwnerProvided(t *testing.T) {
+func Test_VRFV2_5ServiceFailsWhenVRFOwnerProvided(t *testing.T) {
 	db := pgtest.NewSqlxDB(t)
 	cfg := configtest.NewTestGeneralConfig(t)
 	vuni := buildVrfUni(t, db, cfg)
@@ -695,7 +695,7 @@ func Test_VRFV2PlusServiceFailsWhenVRFOwnerProvided(t *testing.T) {
 	chain, err := vuni.legacyChains.Get(testutils.FixtureChainID.String())
 	require.NoError(t, err)
 	vs := testspecs.GenerateVRFSpec(testspecs.VRFSpecParams{
-		VRFVersion:    vrfcommon.V2Plus,
+		VRFVersion:    vrfcommon.V2_5,
 		PublicKey:     vuni.vrfkey.PublicKey.String(),
 		FromAddresses: []string{string(vuni.submitter.Hex())},
 		GasLanePrice:  chain.Config().EVM().GasEstimator().PriceMax(),
@@ -707,5 +707,5 @@ func Test_VRFV2PlusServiceFailsWhenVRFOwnerProvided(t *testing.T) {
 	require.NoError(t, err)
 	_, err = vd.ServicesForSpec(jb)
 	require.Error(t, err)
-	require.Equal(t, "VRF Owner is not supported for VRF V2 Plus", err.Error())
+	require.Equal(t, "VRF Owner is not supported for VRF V2_5", err.Error())
 }

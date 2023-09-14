@@ -132,7 +132,7 @@ const (
 		WHERE evm.txes.state = 'confirmed'
 		AND evm.txes.meta->>'RequestID' = $1
 		AND CAST(evm.txes.meta->>'SubId' AS NUMERIC) = $2 LIMIT 1`
-	ConfirmedEthTxesV2PlusQuery = `SELECT * FROM evm.txes
+	ConfirmedEthTxesV2_5Query = `SELECT * FROM evm.txes
 		WHERE evm.txes.state = 'confirmed'
 		AND evm.txes.meta->>'RequestID' = $1
 		AND CAST(evm.txes.meta->>'GlobalSubId' AS NUMERIC) = $2 LIMIT 1`
@@ -140,7 +140,7 @@ const (
 		SELECT * FROM evm.txes
 		WHERE evm.txes.state = 'confirmed'
 		AND CAST(evm.txes.meta->>'SubId' AS NUMERIC) = $1`
-	ConfirmedEthTxesV2PlusBatchQuery = `
+	ConfirmedEthTxesV2_5BatchQuery = `
 		SELECT * FROM evm.txes
 		WHERE evm.txes.state = 'confirmed'
 		AND CAST(evm.txes.meta->>'GlobalSubId' AS NUMERIC) = $1`
@@ -497,7 +497,7 @@ func subscribeVRF(
 	require.NoError(t, err)
 
 	if nativePayment {
-		require.Equal(t, fundingAmount.String(), sub.EthBalance().String())
+		require.Equal(t, fundingAmount.String(), sub.NativeBalance().String())
 	} else {
 		require.Equal(t, fundingAmount.String(), sub.Balance().String())
 	}
@@ -765,8 +765,8 @@ func assertNumRandomWords(
 
 func mine(t *testing.T, requestID, subID *big.Int, backend *backends.SimulatedBackend, db *sqlx.DB, vrfVersion vrfcommon.Version) bool {
 	var query string
-	if vrfVersion == vrfcommon.V2Plus {
-		query = ConfirmedEthTxesV2PlusQuery
+	if vrfVersion == vrfcommon.V2_5 {
+		query = ConfirmedEthTxesV2_5Query
 	} else if vrfVersion == vrfcommon.V2 {
 		query = ConfirmedEthTxesV2Query
 	} else {
@@ -785,8 +785,8 @@ func mine(t *testing.T, requestID, subID *big.Int, backend *backends.SimulatedBa
 func mineBatch(t *testing.T, requestIDs []*big.Int, subID *big.Int, backend *backends.SimulatedBackend, db *sqlx.DB, vrfVersion vrfcommon.Version) bool {
 	requestIDMap := map[string]bool{}
 	var query string
-	if vrfVersion == vrfcommon.V2Plus {
-		query = ConfirmedEthTxesV2PlusBatchQuery
+	if vrfVersion == vrfcommon.V2_5 {
+		query = ConfirmedEthTxesV2_5BatchQuery
 	} else if vrfVersion == vrfcommon.V2 {
 		query = ConfirmedEthTxesV2BatchQuery
 	} else {
@@ -1301,7 +1301,7 @@ func TestVRFV2Integration_SingleConsumer_NeedsBlockhashStore(t *testing.T) {
 func TestVRFV2Integration_SingleConsumer_NeedsTrustedBlockhashStore(t *testing.T) {
 	t.Parallel()
 	ownerKey := cltest.MustGenerateRandomKey(t)
-	uni := newVRFCoordinatorV2PlusUniverse(t, ownerKey, 2, true)
+	uni := newVRFCoordinatorV2_5Universe(t, ownerKey, 2, true)
 	testMultipleConsumersNeedTrustedBHS(
 		t,
 		ownerKey,
@@ -1312,7 +1312,7 @@ func TestVRFV2Integration_SingleConsumer_NeedsTrustedBlockhashStore(t *testing.T
 		uni.rootContract,
 		uni.rootContractAddress,
 		uni.batchCoordinatorContractAddress,
-		vrfcommon.V2Plus,
+		vrfcommon.V2_5,
 		false,
 		false,
 	)
@@ -1322,7 +1322,7 @@ func TestVRFV2Integration_SingleConsumer_NeedsTrustedBlockhashStore_AfterDelay(t
 	t.Skip("TODO: VRF-616")
 	t.Parallel()
 	ownerKey := cltest.MustGenerateRandomKey(t)
-	uni := newVRFCoordinatorV2PlusUniverse(t, ownerKey, 2, true)
+	uni := newVRFCoordinatorV2_5Universe(t, ownerKey, 2, true)
 	testMultipleConsumersNeedTrustedBHS(
 		t,
 		ownerKey,
@@ -1333,7 +1333,7 @@ func TestVRFV2Integration_SingleConsumer_NeedsTrustedBlockhashStore_AfterDelay(t
 		uni.rootContract,
 		uni.rootContractAddress,
 		uni.batchCoordinatorContractAddress,
-		vrfcommon.V2Plus,
+		vrfcommon.V2_5,
 		false,
 		true,
 	)

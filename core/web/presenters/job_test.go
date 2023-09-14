@@ -46,7 +46,7 @@ func TestJob(t *testing.T) {
 	v2CoordAddress, err := ethkey.NewEIP55Address("0x2C409DD6D4eBDdA190B5174Cc19616DD13884262")
 	require.NoError(t, err)
 
-	v2PlusCoordAddress, err := ethkey.NewEIP55Address("0x92B5e28Ac583812874e4271380c7d070C5FB6E6b")
+	v2_5CoordAddress, err := ethkey.NewEIP55Address("0x92B5e28Ac583812874e4271380c7d070C5FB6E6b")
 	require.NoError(t, err)
 
 	// Used in blockheaderfeeder test
@@ -479,7 +479,7 @@ func TestJob(t *testing.T) {
 					ID:                             1,
 					CoordinatorV1Address:           &v1CoordAddress,
 					CoordinatorV2Address:           &v2CoordAddress,
-					CoordinatorV2PlusAddress:       &v2PlusCoordAddress,
+					CoordinatorV2_5Address:         &v2_5CoordAddress,
 					WaitBlocks:                     123,
 					LookbackBlocks:                 223,
 					BlockhashStoreAddress:          contractAddress,
@@ -523,7 +523,7 @@ func TestJob(t *testing.T) {
 						"blockhashStoreSpec": {
 							"coordinatorV1Address": "0x16988483b46e695f6c8D58e6e1461DC703e008e1",
 							"coordinatorV2Address": "0x2C409DD6D4eBDdA190B5174Cc19616DD13884262",
-							"coordinatorV2PlusAddress": "0x92B5e28Ac583812874e4271380c7d070C5FB6E6b",
+							"coordinatorV2_5Address": "0x92B5e28Ac583812874e4271380c7d070C5FB6E6b",
 							"waitBlocks": 123,
 							"lookbackBlocks": 223,
 							"blockhashStoreAddress": "0x9E40733cC9df84636505f4e6Db28DCa0dC5D1bba",
@@ -557,7 +557,7 @@ func TestJob(t *testing.T) {
 					ID:                         1,
 					CoordinatorV1Address:       &v1CoordAddress,
 					CoordinatorV2Address:       &v2CoordAddress,
-					CoordinatorV2PlusAddress:   &v2PlusCoordAddress,
+					CoordinatorV2_5Address:     &v2_5CoordAddress,
 					WaitBlocks:                 123,
 					LookbackBlocks:             223,
 					BlockhashStoreAddress:      contractAddress,
@@ -603,7 +603,7 @@ func TestJob(t *testing.T) {
 						"blockHeaderFeederSpec": {
 							"coordinatorV1Address": "0x16988483b46e695f6c8D58e6e1461DC703e008e1",
 							"coordinatorV2Address": "0x2C409DD6D4eBDdA190B5174Cc19616DD13884262",
-							"coordinatorV2PlusAddress": "0x92B5e28Ac583812874e4271380c7d070C5FB6E6b",
+							"coordinatorV2_5Address": "0x92B5e28Ac583812874e4271380c7d070C5FB6E6b",
 							"waitBlocks": 123,
 							"lookbackBlocks": 223,
 							"blockhashStoreAddress": "0x9E40733cC9df84636505f4e6Db28DCa0dC5D1bba",

@@ -13,7 +13,7 @@ import (
 	"github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/blockhash_store"
 	v1 "github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/solidity_vrf_coordinator_interface"
 	v2 "github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_coordinator_v2"
-	v2plus "github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_coordinator_v2plus"
+	v2_5 "github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_coordinator_v2_5"
 	"github.com/smartcontractkit/chainlink/v2/core/logger"
 	"github.com/smartcontractkit/chainlink/v2/core/services/blockhashstore"
 	"github.com/smartcontractkit/chainlink/v2/core/services/job"
@@ -123,17 +123,17 @@ func (d *Delegate) ServicesForSpec(jb job.Job, qopts ...pg.QOpt) ([]job.ServiceC
 		}
 		coordinators = append(coordinators, coord)
 	}
-	if jb.BlockHeaderFeederSpec.CoordinatorV2PlusAddress != nil {
-		var c *v2plus.VRFCoordinatorV2Plus
-		if c, err = v2plus.NewVRFCoordinatorV2Plus(
-			jb.BlockHeaderFeederSpec.CoordinatorV2PlusAddress.Address(), chain.Client()); err != nil {
+	if jb.BlockHeaderFeederSpec.CoordinatorV2_5Address != nil {
+		var c *v2_5.VRFCoordinatorV25
+		if c, err = v2_5.NewVRFCoordinatorV25(
+			jb.BlockHeaderFeederSpec.CoordinatorV2_5Address.Address(), chain.Client()); err != nil {
 
-			return nil, errors.Wrap(err, "building V2 plus coordinator")
+			return nil, errors.Wrap(err, "building V2_5 coordinator")
 		}
-		var coord *blockhashstore.V2PlusCoordinator
-		coord, err = blockhashstore.NewV2PlusCoordinator(c, lp)
+		var coord *blockhashstore.V2_5Coordinator
+		coord, err = blockhashstore.NewV2_5Coordinator(c, lp)
 		if err != nil {
-			return nil, errors.Wrap(err, "building V2 plus coordinator")
+			return nil, errors.Wrap(err, "building V2_5 coordinator")
 		}
 		coordinators = append(coordinators, coord)
 	}

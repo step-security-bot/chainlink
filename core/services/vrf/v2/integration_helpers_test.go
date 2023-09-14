@@ -228,19 +228,19 @@ func testMultipleConsumersNeedBHS(
 	keyHash := vrfJobs[0].VRFSpec.PublicKey.MustHash()
 
 	var (
-		v2CoordinatorAddress     string
-		v2PlusCoordinatorAddress string
+		v2CoordinatorAddress   string
+		v2_5CoordinatorAddress string
 	)
 
 	if vrfVersion == vrfcommon.V2 {
 		v2CoordinatorAddress = coordinatorAddress.String()
-	} else if vrfVersion == vrfcommon.V2Plus {
-		v2PlusCoordinatorAddress = coordinatorAddress.String()
+	} else if vrfVersion == vrfcommon.V2_5 {
+		v2_5CoordinatorAddress = coordinatorAddress.String()
 	}
 
 	_ = vrftesthelpers.CreateAndStartBHSJob(
 		t, bhsKeyAddresses, app, uni.bhsContractAddress.String(), "",
-		v2CoordinatorAddress, v2PlusCoordinatorAddress, "", 0, 200)
+		v2CoordinatorAddress, v2_5CoordinatorAddress, "", 0, 200)
 
 	// Ensure log poller is ready and has all logs.
 	require.NoError(t, app.GetRelayers().LegacyEVMChains().Slice()[0].LogPoller().Ready())
@@ -299,7 +299,7 @@ func testMultipleConsumersNeedBHS(
 func testMultipleConsumersNeedTrustedBHS(
 	t *testing.T,
 	ownerKey ethkey.KeyV2,
-	uni coordinatorV2PlusUniverse,
+	uni coordinatorV2_5Universe,
 	consumers []*bind.TransactOpts,
 	consumerContracts []vrftesthelpers.VRFConsumerContract,
 	consumerContractAddresses []common.Address,
@@ -373,19 +373,19 @@ func testMultipleConsumersNeedTrustedBHS(
 	keyHash := vrfJobs[0].VRFSpec.PublicKey.MustHash()
 
 	var (
-		v2CoordinatorAddress     string
-		v2PlusCoordinatorAddress string
+		v2CoordinatorAddress   string
+		v2_5CoordinatorAddress string
 	)
 
 	if vrfVersion == vrfcommon.V2 {
 		v2CoordinatorAddress = coordinatorAddress.String()
-	} else if vrfVersion == vrfcommon.V2Plus {
-		v2PlusCoordinatorAddress = coordinatorAddress.String()
+	} else if vrfVersion == vrfcommon.V2_5 {
+		v2_5CoordinatorAddress = coordinatorAddress.String()
 	}
 
 	_ = vrftesthelpers.CreateAndStartBHSJob(
 		t, bhsKeyAddressesStrings, app, "", "",
-		v2CoordinatorAddress, v2PlusCoordinatorAddress, uni.trustedBhsContractAddress.String(), 20, 1000)
+		v2CoordinatorAddress, v2_5CoordinatorAddress, uni.trustedBhsContractAddress.String(), 20, 1000)
 
 	// Ensure log poller is ready and has all logs.
 	chain := app.GetRelayers().LegacyEVMChains().Slice()[0]
@@ -478,7 +478,7 @@ func verifyBlockhashStored(
 
 func verifyBlockhashStoredTrusted(
 	t *testing.T,
-	uni coordinatorV2PlusUniverse,
+	uni coordinatorV2_5Universe,
 	requestBlock uint64,
 ) {
 	// Wait for the blockhash to be stored
@@ -761,18 +761,18 @@ func testBlockHeaderFeeder(
 		gasLanePriceWei)
 	keyHash := vrfJobs[0].VRFSpec.PublicKey.MustHash()
 	var (
-		v2coordinatorAddress     string
-		v2plusCoordinatorAddress string
+		v2coordinatorAddress   string
+		v2_5CoordinatorAddress string
 	)
 	if vrfVersion == vrfcommon.V2 {
 		v2coordinatorAddress = coordinatorAddress.String()
-	} else if vrfVersion == vrfcommon.V2Plus {
-		v2plusCoordinatorAddress = coordinatorAddress.String()
+	} else if vrfVersion == vrfcommon.V2_5 {
+		v2_5CoordinatorAddress = coordinatorAddress.String()
 	}
 
 	_ = vrftesthelpers.CreateAndStartBlockHeaderFeederJob(
 		t, bhfKeys, app, uni.bhsContractAddress.String(), uni.batchBHSContractAddress.String(), "",
-		v2coordinatorAddress, v2plusCoordinatorAddress)
+		v2coordinatorAddress, v2_5CoordinatorAddress)
 
 	// Ensure log poller is ready and has all logs.
 	require.NoError(t, app.GetRelayers().LegacyEVMChains().Slice()[0].LogPoller().Ready())
@@ -856,7 +856,7 @@ func setupAndFundSubscriptionAndConsumer(
 	require.NoError(t, err, "failed to add consumer")
 	uni.backend.Commit()
 
-	if vrfVersion == vrfcommon.V2Plus {
+	if vrfVersion == vrfcommon.V2_5 {
 		b, err := utils.ABIEncode(`[{"type":"uint256"}]`, subID)
 		require.NoError(t, err)
 		_, err = uni.linkContract.TransferAndCall(
@@ -1611,7 +1611,7 @@ func testMaliciousConsumer(
 	batchEnabled bool,
 	vrfVersion vrfcommon.Version,
 ) {
-	config, _ := heavyweight.FullTestDBV2(t, "vrf_v2plus_integration_malicious", func(c *chainlink.Config, s *chainlink.Secrets) {
+	config, _ := heavyweight.FullTestDBV2(t, "vrf_v2_5_integration_malicious", func(c *chainlink.Config, s *chainlink.Secrets) {
 		c.EVM[0].GasEstimator.LimitDefault = ptr[uint32](2_000_000)
 		c.EVM[0].GasEstimator.PriceMax = assets.GWei(1)
 		c.EVM[0].GasEstimator.PriceDefault = assets.GWei(1)

@@ -19,7 +19,7 @@ import (
 	evmtypes "github.com/smartcontractkit/chainlink/v2/core/chains/evm/types"
 	v1 "github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/solidity_vrf_coordinator_interface"
 	v2 "github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_coordinator_v2"
-	v2plus "github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_coordinator_v2plus"
+	v2_5 "github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_coordinator_v2_5"
 	"github.com/smartcontractkit/chainlink/v2/core/logger"
 	"github.com/smartcontractkit/chainlink/v2/core/utils"
 	bigmath "github.com/smartcontractkit/chainlink/v2/core/utils/big_math"
@@ -80,14 +80,14 @@ func (c *CheckerFactory) BuildChecker(spec TransmitCheckerSpec) (TransmitChecker
 			HeadByNumber:       c.Client.HeadByNumber,
 			RequestBlockNumber: spec.VRFRequestBlockNumber,
 		}, nil
-	case TransmitCheckerTypeVRFV2Plus:
+	case TransmitCheckerTypeVRFV2_5:
 		if spec.VRFCoordinatorAddress == nil {
 			return nil, errors.Errorf("malformed checker, expected non-nil VRFCoordinatorAddress, got: %v", spec)
 		}
-		coord, err := v2plus.NewVRFCoordinatorV2Plus(*spec.VRFCoordinatorAddress, c.Client)
+		coord, err := v2_5.NewVRFCoordinatorV25(*spec.VRFCoordinatorAddress, c.Client)
 		if err != nil {
 			return nil, errors.Wrapf(err,
-				"failed to create VRF V2 coordinator plus at address %v", spec.VRFCoordinatorAddress)
+				"failed to create VRF V2_5 coordinator at address %v", spec.VRFCoordinatorAddress)
 		}
 		if spec.VRFRequestBlockNumber == nil {
 			return nil, errors.New("VRFRequestBlockNumber parameter must be non-nil")

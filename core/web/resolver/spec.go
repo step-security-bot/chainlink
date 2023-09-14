@@ -775,12 +775,12 @@ func (b *BlockhashStoreSpecResolver) CoordinatorV2Address() *string {
 	return &addr
 }
 
-// CoordinatorV2PlusAddress returns the address of the V2Plus Coordinator, if any.
-func (b *BlockhashStoreSpecResolver) CoordinatorV2PlusAddress() *string {
-	if b.spec.CoordinatorV2PlusAddress == nil {
+// CoordinatorV2_5Address returns the address of the V2_5 Coordinator, if any.
+func (b *BlockhashStoreSpecResolver) CoordinatorV2_5Address() *string {
+	if b.spec.CoordinatorV2_5Address == nil {
 		return nil
 	}
-	addr := b.spec.CoordinatorV2PlusAddress.String()
+	addr := b.spec.CoordinatorV2_5Address.String()
 	return &addr
 }
 
@@ -869,12 +869,12 @@ func (b *BlockHeaderFeederSpecResolver) CoordinatorV2Address() *string {
 	return &addr
 }
 
-// CoordinatorV2PlusAddress returns the address of the V2 Coordinator Plus, if any.
-func (b *BlockHeaderFeederSpecResolver) CoordinatorV2PlusAddress() *string {
-	if b.spec.CoordinatorV2PlusAddress == nil {
+// CoordinatorV2_5Address returns the address of the V2_5 Coordinator, if any.
+func (b *BlockHeaderFeederSpecResolver) CoordinatorV2_5Address() *string {
+	if b.spec.CoordinatorV2_5Address == nil {
 		return nil
 	}
-	addr := b.spec.CoordinatorV2PlusAddress.String()
+	addr := b.spec.CoordinatorV2_5Address.String()
 	return &addr
 }
 

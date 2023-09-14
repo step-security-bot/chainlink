@@ -327,7 +327,7 @@ func NewVRFSpec(spec *job.VRFSpec) *VRFSpec {
 type BlockhashStoreSpec struct {
 	CoordinatorV1Address           *ethkey.EIP55Address  `json:"coordinatorV1Address"`
 	CoordinatorV2Address           *ethkey.EIP55Address  `json:"coordinatorV2Address"`
-	CoordinatorV2PlusAddress       *ethkey.EIP55Address  `json:"coordinatorV2PlusAddress"`
+	CoordinatorV2_5Address         *ethkey.EIP55Address  `json:"coordinatorV2_5Address"`
 	WaitBlocks                     int32                 `json:"waitBlocks"`
 	LookbackBlocks                 int32                 `json:"lookbackBlocks"`
 	BlockhashStoreAddress          ethkey.EIP55Address   `json:"blockhashStoreAddress"`
@@ -346,7 +346,7 @@ func NewBlockhashStoreSpec(spec *job.BlockhashStoreSpec) *BlockhashStoreSpec {
 	return &BlockhashStoreSpec{
 		CoordinatorV1Address:           spec.CoordinatorV1Address,
 		CoordinatorV2Address:           spec.CoordinatorV2Address,
-		CoordinatorV2PlusAddress:       spec.CoordinatorV2PlusAddress,
+		CoordinatorV2_5Address:         spec.CoordinatorV2_5Address,
 		WaitBlocks:                     spec.WaitBlocks,
 		LookbackBlocks:                 spec.LookbackBlocks,
 		BlockhashStoreAddress:          spec.BlockhashStoreAddress,
@@ -363,7 +363,7 @@ func NewBlockhashStoreSpec(spec *job.BlockhashStoreSpec) *BlockhashStoreSpec {
 type BlockHeaderFeederSpec struct {
 	CoordinatorV1Address       *ethkey.EIP55Address  `json:"coordinatorV1Address"`
 	CoordinatorV2Address       *ethkey.EIP55Address  `json:"coordinatorV2Address"`
-	CoordinatorV2PlusAddress   *ethkey.EIP55Address  `json:"coordinatorV2PlusAddress"`
+	CoordinatorV2_5Address     *ethkey.EIP55Address  `json:"coordinatorV2_5Address"`
 	WaitBlocks                 int32                 `json:"waitBlocks"`
 	LookbackBlocks             int32                 `json:"lookbackBlocks"`
 	BlockhashStoreAddress      ethkey.EIP55Address   `json:"blockhashStoreAddress"`
@@ -384,7 +384,7 @@ func NewBlockHeaderFeederSpec(spec *job.BlockHeaderFeederSpec) *BlockHeaderFeede
 	return &BlockHeaderFeederSpec{
 		CoordinatorV1Address:       spec.CoordinatorV1Address,
 		CoordinatorV2Address:       spec.CoordinatorV2Address,
-		CoordinatorV2PlusAddress:   spec.CoordinatorV2PlusAddress,
+		CoordinatorV2_5Address:     spec.CoordinatorV2_5Address,
 		WaitBlocks:                 spec.WaitBlocks,
 		LookbackBlocks:             spec.LookbackBlocks,
 		BlockhashStoreAddress:      spec.BlockhashStoreAddress,

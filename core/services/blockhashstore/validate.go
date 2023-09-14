@@ -41,9 +41,9 @@ func ValidatedSpec(tomlString string) (job.Job, error) {
 	}
 
 	// Required fields
-	if spec.CoordinatorV1Address == nil && spec.CoordinatorV2Address == nil && spec.CoordinatorV2PlusAddress == nil {
+	if spec.CoordinatorV1Address == nil && spec.CoordinatorV2Address == nil && spec.CoordinatorV2_5Address == nil {
 		return jb, errors.New(
-			`at least one of "coordinatorV1Address", "coordinatorV2Address" and "coordinatorV2PlusAddress" must be set`)
+			`at least one of "coordinatorV1Address", "coordinatorV2Address" and "coordinatorV2_5Address" must be set`)
 	}
 	if spec.BlockhashStoreAddress == "" {
 		return jb, notSet("blockhashStoreAddress")

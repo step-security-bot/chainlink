@@ -54,23 +54,23 @@ compileContractAltOpts vrf/VRFCoordinatorV2.sol 10000
 compileContract mocks/VRFCoordinatorV2Mock.sol
 compileContract vrf/VRFOwner.sol
 
-# VRF V2Plus
-compileContract dev/vrf/testhelpers/VRFV2PlusConsumerExample.sol
-compileContractAltOpts dev/vrf/VRFCoordinatorV2Plus.sol 500
-compileContract dev/vrf/BatchVRFCoordinatorV2Plus.sol
-compileContract dev/vrf/VRFV2PlusWrapper.sol
-compileContract dev/vrf/testhelpers/VRFConsumerV2PlusUpgradeableExample.sol
-compileContract dev/vrf/testhelpers/VRFMaliciousConsumerV2Plus.sol
-compileContract dev/vrf/testhelpers/VRFV2PlusExternalSubOwnerExample.sol
-compileContract dev/vrf/testhelpers/VRFV2PlusSingleConsumerExample.sol
-compileContract dev/vrf/testhelpers/VRFV2PlusWrapperConsumerExample.sol
-compileContract dev/vrf/testhelpers/VRFV2PlusRevertingExample.sol
-compileContract dev/vrf/testhelpers/VRFConsumerV2PlusUpgradeableExample.sol
-compileContract dev/vrf/testhelpers/VRFV2PlusMaliciousMigrator.sol
-compileContract dev/vrf/libraries/VRFV2PlusClient.sol
-compileContract dev/vrf/testhelpers/VRFCoordinatorV2Plus_V2Example.sol
+# VRF V2_5
+compileContract dev/vrf/testhelpers/VRFV2_5_ConsumerExample.sol
+compileContractAltOpts dev/vrf/VRFCoordinatorV2_5.sol 500
+compileContract dev/vrf/BatchVRFCoordinatorV2_5.sol
+compileContract dev/vrf/VRFV2_5_Wrapper.sol
+compileContract dev/vrf/testhelpers/VRFConsumerV2_5_UpgradeableExample.sol
+compileContract dev/vrf/testhelpers/VRFMaliciousConsumerV2_5.sol
+compileContract dev/vrf/testhelpers/VRFV2_5_ExternalSubOwnerExample.sol
+compileContract dev/vrf/testhelpers/VRFV2_5_SingleConsumerExample.sol
+compileContract dev/vrf/testhelpers/VRFV2_5_WrapperConsumerExample.sol
+compileContract dev/vrf/testhelpers/VRFV2_5_RevertingExample.sol
+compileContract dev/vrf/testhelpers/VRFConsumerV2_5_UpgradeableExample.sol
+compileContract dev/vrf/testhelpers/VRFV2_5_MaliciousMigrator.sol
+compileContract dev/vrf/libraries/VRFV2_5_Client.sol
+compileContract dev/vrf/testhelpers/VRFCoordinatorV2_5_V2Example.sol
 compileContract dev/vrf/TrustedBlockhashStore.sol
-compileContract dev/vrf/testhelpers/VRFV2PlusLoadTestWithMetrics.sol
+compileContract dev/vrf/testhelpers/VRFV2_5_LoadTestWithMetrics.sol
 
 # VRF V2 Wrapper
 compileContract vrf/VRFV2Wrapper.sol

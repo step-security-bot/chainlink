@@ -20,7 +20,7 @@ import (
 	"github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/batch_vrf_coordinator_v2"
 	"github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/solidity_vrf_coordinator_interface"
 	"github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_coordinator_v2"
-	"github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_coordinator_v2plus"
+	"github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_coordinator_v2_5"
 	"github.com/smartcontractkit/chainlink/v2/core/gethwrappers/generated/vrf_owner"
 	"github.com/smartcontractkit/chainlink/v2/core/logger"
 	"github.com/smartcontractkit/chainlink/v2/core/services/job"
@@ -94,7 +94,7 @@ func (d *Delegate) ServicesForSpec(jb job.Job, qopts ...pg.QOpt) ([]job.ServiceC
 	if err != nil {
 		return nil, err
 	}
-	coordinatorV2Plus, err := vrf_coordinator_v2plus.NewVRFCoordinatorV2Plus(jb.VRFSpec.CoordinatorAddress.Address(), chain.Client())
+	coordinatorV2_5, err := vrf_coordinator_v2_5.NewVRFCoordinatorV25(jb.VRFSpec.CoordinatorAddress.Address(), chain.Client())
 	if err != nil {
 		return nil, err
 	}
@@ -126,10 +126,10 @@ func (d *Delegate) ServicesForSpec(jb job.Job, qopts ...pg.QOpt) ([]job.ServiceC
 	)
 	lV1 := l.Named("VRFListener")
 	lV2 := l.Named("VRFListenerV2")
-	lV2Plus := l.Named("VRFListenerV2Plus")
+	lV2_5 := l.Named("VRFListenerV2_5")
 
 	for _, task := range pl.Tasks {
-		if _, ok := task.(*pipeline.VRFTaskV2Plus); ok {
+		if _, ok := task.(*pipeline.VRFTaskV2_5); ok {
 			if err := CheckFromAddressesExist(jb, d.ks.Eth()); err != nil {
 				return nil, err
 			}
@@ -142,13 +142,13 @@ func (d *Delegate) ServicesForSpec(jb job.Job, qopts ...pg.QOpt) ([]job.ServiceC
 				return nil, err
 			}
 			if vrfOwner != nil {
-				return nil, errors.New("VRF Owner is not supported for VRF V2 Plus")
+				return nil, errors.New("VRF Owner is not supported for VRF V2_5")
 			}
-			linkEthFeedAddress, err := coordinatorV2Plus.LINKETHFEED(nil)
+			linkNativeFeedAddress, err := coordinatorV2_5.LINKNATIVEFEED(nil)
 			if err != nil {
-				return nil, errors.Wrap(err, "LINKETHFEED")
+				return nil, errors.Wrap(err, "LINKNATIVEFEED")
 			}
-			aggregator, err := aggregator_v3_interface.NewAggregatorV3Interface(linkEthFeedAddress, chain.Client())
+			aggregator, err := aggregator_v3_interface.NewAggregatorV3Interface(linkNativeFeedAddress, chain.Client())
 			if err != nil {
 				return nil, errors.Wrap(err, "NewAggregatorV3Interface")
 			}
@@ -156,12 +156,12 @@ func (d *Delegate) ServicesForSpec(jb job.Job, qopts ...pg.QOpt) ([]job.ServiceC
 			return []job.ServiceCtx{v2.New(
 				chain.Config().EVM(),
 				chain.Config().EVM().GasEstimator(),
-				lV2Plus,
+				lV2_5,
 				chain.Client(),
 				chain.ID(),
 				chain.LogBroadcaster(),
 				d.q,
-				v2.NewCoordinatorV2Plus(coordinatorV2Plus),
+				v2.NewCoordinatorV2_5(coordinatorV2_5),
 				batchCoordinatorV2,
 				vrfOwner,
 				aggregator,
@@ -172,7 +172,7 @@ func (d *Delegate) ServicesForSpec(jb job.Job, qopts ...pg.QOpt) ([]job.ServiceC
 				d.mailMon,
 				utils.NewHighCapacityMailbox[log.Broadcast](),
 				func() {},
-				GetStartingResponseCountsV2(d.q, lV2Plus, chainId.Uint64(), chain.Config().EVM().FinalityDepth()),
+				GetStartingResponseCountsV2(d.q, lV2_5, chainId.Uint64(), chain.Config().EVM().FinalityDepth()),
 				chain.HeadBroadcaster(),
 				vrfcommon.NewLogDeduper(int(chain.Config().EVM().FinalityDepth())))}, nil
 		}
@@ -189,11 +189,11 @@ func (d *Delegate) ServicesForSpec(jb job.Job, qopts ...pg.QOpt) ([]job.ServiceC
 				return nil, err
 			}
 
-			linkEthFeedAddress, err := coordinatorV2.LINKETHFEED(nil)
+			linkNativeFeedAddress, err := coordinatorV2.LINKETHFEED(nil)
 			if err != nil {
 				return nil, errors.Wrap(err, "LINKETHFEED")
 			}
-			aggregator, err := aggregator_v3_interface.NewAggregatorV3Interface(linkEthFeedAddress, chain.Client())
+			aggregator, err := aggregator_v3_interface.NewAggregatorV3Interface(linkNativeFeedAddress, chain.Client())
 			if err != nil {
 				return nil, errors.Wrap(err, "NewAggregatorV3Interface")
 			}

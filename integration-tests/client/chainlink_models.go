@@ -620,24 +620,24 @@ func (d *PipelineSpec) String() (string, error) {
 	return MarshallTemplate(d, "API call pipeline template", sourceString)
 }
 
-// VRFV2TxPipelineSpec VRFv2 request with tx callback
-type VRFV2PlusTxPipelineSpec struct {
+// VRFV2_5TxPipelineSpec VRFv2_5 request with tx callback
+type VRFV2_5TxPipelineSpec struct {
 	Address string
 }
 
 // Type returns the type of the pipeline
-func (d *VRFV2PlusTxPipelineSpec) Type() string {
-	return "vrf_pipeline_v2plus"
+func (d *VRFV2_5TxPipelineSpec) Type() string {
+	return "vrf_pipeline_v2_5"
 }
 
 // String representation of the pipeline
-func (d *VRFV2PlusTxPipelineSpec) String() (string, error) {
+func (d *VRFV2_5TxPipelineSpec) String() (string, error) {
 	sourceString := `
 decode_log   [type=ethabidecodelog
              abi="RandomWordsRequested(bytes32 indexed keyHash,uint256 requestId,uint256 preSeed,uint256 indexed subId,uint16 minimumRequestConfirmations,uint32 callbackGasLimit,uint32 numWords,bytes extraArgs,address indexed sender)"
              data="$(jobRun.logData)"
              topics="$(jobRun.logTopics)"]
-generate_proof [type=vrfv2plus
+generate_proof [type=vrfv2_5
                 publicKey="$(jobSpec.publicKey)"
                 requestBlockHash="$(jobRun.logBlockHash)"
                 requestBlockNumber="$(jobRun.logBlockNumber)"
@@ -654,7 +654,7 @@ simulate_fulfillment [type=ethcall
                       contract="{{ .Address }}"
                       data="$(generate_proof.output)"]
 decode_log->generate_proof->estimate_gas->simulate_fulfillment`
-	return MarshallTemplate(d, "VRFV2 Plus pipeline template", sourceString)
+	return MarshallTemplate(d, "VRFV2_5 pipeline template", sourceString)
 }
 
 // VRFV2TxPipelineSpec VRFv2 request with tx callback
@@ -1101,8 +1101,8 @@ observationSource                      = """
 	return MarshallTemplate(specWrap, "OCR2 Job", ocr2TemplateString)
 }
 
-// VRFV2PlusJobSpec represents a VRFV2 job
-type VRFV2PlusJobSpec struct {
+// VRFV2_5JobSpec represents a VRFV2 job
+type VRFV2_5JobSpec struct {
 	Name                     string        `toml:"name"`
 	CoordinatorAddress       string        `toml:"coordinatorAddress"` // Address of the VRF CoordinatorV2 contract
 	PublicKey                string        `toml:"publicKey"`          // Public key of the proving key
@@ -1117,10 +1117,10 @@ type VRFV2PlusJobSpec struct {
 }
 
 // Type returns the type of the job
-func (v *VRFV2PlusJobSpec) Type() string { return "vrf" }
+func (v *VRFV2_5JobSpec) Type() string { return "vrf" }
 
 // String representation of the job
-func (v *VRFV2PlusJobSpec) String() (string, error) {
+func (v *VRFV2_5JobSpec) String() (string, error) {
 	vrfTemplateString := `
 type                     = "vrf"
 schemaVersion            = 1
@@ -1138,7 +1138,7 @@ observationSource = """
 {{.ObservationSource}}
 """
 `
-	return MarshallTemplate(v, "VRFV2 PLUS Job", vrfTemplateString)
+	return MarshallTemplate(v, "VRFV2_5 Job", vrfTemplateString)
 }
 
 // VRFV2JobSpec represents a VRFV2 job

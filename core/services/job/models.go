@@ -563,9 +563,9 @@ type BlockhashStoreSpec struct {
 	// no V2 coordinator will be watched.
 	CoordinatorV2Address *ethkey.EIP55Address `toml:"coordinatorV2Address"`
 
-	// CoordinatorV2PlusAddress is the VRF V2Plus coordinator to watch for unfulfilled requests. If empty,
-	// no V2Plus coordinator will be watched.
-	CoordinatorV2PlusAddress *ethkey.EIP55Address `toml:"coordinatorV2PlusAddress"`
+	// CoordinatorV2_5Address is the VRF V2_5 coordinator to watch for unfulfilled requests. If empty,
+	// no V2_5 coordinator will be watched.
+	CoordinatorV2_5Address *ethkey.EIP55Address `toml:"coordinatorV2_5Address"`
 
 	// LookbackBlocks defines the maximum age of blocks whose hashes should be stored.
 	LookbackBlocks int32 `toml:"lookbackBlocks"`
@@ -614,9 +614,9 @@ type BlockHeaderFeederSpec struct {
 	// no V2 coordinator will be watched.
 	CoordinatorV2Address *ethkey.EIP55Address `toml:"coordinatorV2Address"`
 
-	// CoordinatorV2PlusAddress is the VRF V2Plus coordinator to watch for unfulfilled requests. If empty,
-	// no V2Plus coordinator will be watched.
-	CoordinatorV2PlusAddress *ethkey.EIP55Address `toml:"coordinatorV2PlusAddress"`
+	// CoordinatorV2_5Address is the VRF V2_5 coordinator to watch for unfulfilled requests. If empty,
+	// no V2_5 coordinator will be watched.
+	CoordinatorV2_5Address *ethkey.EIP55Address `toml:"coordinatorV2_5Address"`
 
 	// LookbackBlocks defines the maximum age of blocks whose hashes should be stored.
 	LookbackBlocks int32 `toml:"lookbackBlocks"`

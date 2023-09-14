@@ -364,13 +364,13 @@ simulate [type=ethcall
 decode_log->vrf->estimate_gas->simulate
 `, coordinatorAddress, coordinatorAddress, coordinatorAddress)
 	}
-	if vrfVersion == vrfcommon.V2Plus {
+	if vrfVersion == vrfcommon.V2_5 {
 		observationSource = fmt.Sprintf(`
 decode_log              [type=ethabidecodelog
                          abi="RandomWordsRequested(bytes32 indexed keyHash,uint256 requestId,uint256 preSeed,uint256 indexed subId,uint16 minimumRequestConfirmations,uint32 callbackGasLimit,uint32 numWords,bytes extraArgs,address indexed sender)"
                          data="$(jobRun.logData)"
                          topics="$(jobRun.logTopics)"]
-generate_proof          [type=vrfv2plus
+generate_proof          [type=vrfv2_5
                          publicKey="$(jobSpec.publicKey)"
                          requestBlockHash="$(jobRun.logBlockHash)"
                          requestBlockNumber="$(jobRun.logBlockNumber)"
@@ -590,7 +590,7 @@ type BlockhashStoreSpecParams struct {
 	Name                           string
 	CoordinatorV1Address           string
 	CoordinatorV2Address           string
-	CoordinatorV2PlusAddress       string
+	CoordinatorV2_5Address         string
 	WaitBlocks                     int
 	LookbackBlocks                 int
 	BlockhashStoreAddress          string
@@ -631,8 +631,8 @@ func GenerateBlockhashStoreSpec(params BlockhashStoreSpecParams) BlockhashStoreS
 		params.CoordinatorV2Address = "0x2498e651Ae17C2d98417C4826F0816Ac6366A95E"
 	}
 
-	if params.CoordinatorV2PlusAddress == "" {
-		params.CoordinatorV2PlusAddress = "0x92B5e28Ac583812874e4271380c7d070C5FB6E6b"
+	if params.CoordinatorV2_5Address == "" {
+		params.CoordinatorV2_5Address = "0x92B5e28Ac583812874e4271380c7d070C5FB6E6b"
 	}
 
 	if params.TrustedBlockhashStoreAddress == "" {
@@ -680,7 +680,7 @@ schemaVersion = 1
 name = "%s"
 coordinatorV1Address = "%s"
 coordinatorV2Address = "%s"
-coordinatorV2PlusAddress = "%s"
+coordinatorV2_5Address = "%s"
 waitBlocks = %d
 lookbackBlocks = %d
 blockhashStoreAddress = "%s"
@@ -692,7 +692,7 @@ evmChainID = "%d"
 fromAddresses = %s
 `
 	toml := fmt.Sprintf(template, params.Name, params.CoordinatorV1Address,
-		params.CoordinatorV2Address, params.CoordinatorV2PlusAddress, params.WaitBlocks, params.LookbackBlocks,
+		params.CoordinatorV2Address, params.CoordinatorV2_5Address, params.WaitBlocks, params.LookbackBlocks,
 		params.BlockhashStoreAddress, params.TrustedBlockhashStoreAddress, params.TrustedBlockhashStoreBatchSize, params.PollPeriod.String(), params.RunTimeout.String(),
 		params.EVMChainID, formattedFromAddresses)
 
@@ -705,7 +705,7 @@ type BlockHeaderFeederSpecParams struct {
 	Name                       string
 	CoordinatorV1Address       string
 	CoordinatorV2Address       string
-	CoordinatorV2PlusAddress   string
+	CoordinatorV2_5Address     string
 	WaitBlocks                 int
 	LookbackBlocks             int
 	BlockhashStoreAddress      string
@@ -747,8 +747,8 @@ func GenerateBlockHeaderFeederSpec(params BlockHeaderFeederSpecParams) BlockHead
 		params.CoordinatorV2Address = "0x2d7F888fE0dD469bd81A12f77e6291508f714d4B"
 	}
 
-	if params.CoordinatorV2PlusAddress == "" {
-		params.CoordinatorV2PlusAddress = "0x2d7F888fE0dD469bd81A12f77e6291508f714d4B"
+	if params.CoordinatorV2_5Address == "" {
+		params.CoordinatorV2_5Address = "0x2d7F888fE0dD469bd81A12f77e6291508f714d4B"
 	}
 
 	if params.WaitBlocks == 0 {
@@ -800,7 +800,7 @@ schemaVersion = 1
 name = "%s"
 coordinatorV1Address = "%s"
 coordinatorV2Address = "%s"
-coordinatorV2PlusAddress = "%s"
+coordinatorV2_5Address = "%s"
 waitBlocks = %d
 lookbackBlocks = %d
 blockhashStoreAddress = "%s"
@@ -813,7 +813,7 @@ getBlockhashesBatchSize = %d
 storeBlockhashesBatchSize = %d
 `
 	toml := fmt.Sprintf(template, params.Name, params.CoordinatorV1Address,
-		params.CoordinatorV2Address, params.CoordinatorV2PlusAddress, params.WaitBlocks, params.LookbackBlocks,
+		params.CoordinatorV2Address, params.CoordinatorV2_5Address, params.WaitBlocks, params.LookbackBlocks,
 		params.BlockhashStoreAddress, params.BatchBlockhashStoreAddress, params.PollPeriod.String(),
 		params.RunTimeout.String(), params.EVMChainID, formattedFromAddresses, params.GetBlockhashesBatchSize,
 		params.StoreBlockhashesBatchSize)

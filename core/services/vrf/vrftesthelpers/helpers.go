@@ -49,7 +49,7 @@ func CreateAndStartBHSJob(
 	t *testing.T,
 	fromAddresses []string,
 	app *cltest.TestApplication,
-	bhsAddress, coordinatorV1Address, coordinatorV2Address, coordinatorV2PlusAddress string,
+	bhsAddress, coordinatorV1Address, coordinatorV2Address, coordinatorV2_5Address string,
 	trustedBlockhashStoreAddress string, trustedBlockhashStoreBatchSize int32, lookback int,
 ) job.Job {
 	jid := uuid.New()
@@ -58,7 +58,7 @@ func CreateAndStartBHSJob(
 		Name:                           "blockhash-store",
 		CoordinatorV1Address:           coordinatorV1Address,
 		CoordinatorV2Address:           coordinatorV2Address,
-		CoordinatorV2PlusAddress:       coordinatorV2PlusAddress,
+		CoordinatorV2_5Address:         coordinatorV2_5Address,
 		WaitBlocks:                     100,
 		LookbackBlocks:                 lookback,
 		BlockhashStoreAddress:          bhsAddress,
@@ -90,7 +90,7 @@ func CreateAndStartBlockHeaderFeederJob(
 	t *testing.T,
 	fromAddresses []string,
 	app *cltest.TestApplication,
-	bhsAddress, batchBHSAddress, coordinatorV1Address, coordinatorV2Address, coordinatorV2PlusAddress string,
+	bhsAddress, batchBHSAddress, coordinatorV1Address, coordinatorV2Address, coordinatorV2_5Address string,
 ) job.Job {
 	jid := uuid.New()
 	s := testspecs.GenerateBlockHeaderFeederSpec(testspecs.BlockHeaderFeederSpecParams{
@@ -98,7 +98,7 @@ func CreateAndStartBlockHeaderFeederJob(
 		Name:                       "block-header-feeder",
 		CoordinatorV1Address:       coordinatorV1Address,
 		CoordinatorV2Address:       coordinatorV2Address,
-		CoordinatorV2PlusAddress:   coordinatorV2PlusAddress,
+		CoordinatorV2_5Address:     coordinatorV2_5Address,
 		WaitBlocks:                 256,
 		LookbackBlocks:             1000,
 		BlockhashStoreAddress:      bhsAddress,

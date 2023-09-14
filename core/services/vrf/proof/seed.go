@@ -45,7 +45,7 @@ type PreSeedDataV2 struct {
 	Sender           common.Address
 }
 
-type PreSeedDataV2Plus struct {
+type PreSeedDataV2_5 struct {
 	PreSeed          Seed        // Seed to be mixed with hash of containing block
 	BlockHash        common.Hash // Hash of block containing VRF request
 	BlockNum         uint64      // Cardinal number of block containing VRF request
@@ -69,7 +69,7 @@ func FinalSeedV2(s PreSeedDataV2) (finalSeed *big.Int) {
 	return utils.MustHash(string(seedHashMsg)).Big()
 }
 
-func FinalSeedV2Plus(s PreSeedDataV2Plus) (finalSeed *big.Int) {
+func FinalSeedV2_5(s PreSeedDataV2_5) (finalSeed *big.Int) {
 	seedHashMsg := append(s.PreSeed[:], s.BlockHash.Bytes()...)
 	return utils.MustHash(string(seedHashMsg)).Big()
 }
