@@ -26,7 +26,7 @@ jobs:
       matrix:
         cmd: ["go_core_tests"]
     name: Core Tests (${{ matrix.cmd }})
-    runs-on: ubuntu20.04-32cores-128GB
+    runs-on: ubuntu20.04-64cores-256GB
     env:
       CL_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/chainlink_test?sslmode=disable
     steps:
