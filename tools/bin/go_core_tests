@@ -3,4 +3,4 @@ set -o pipefail
 set +e
 
 GO_LDFLAGS=$(bash tools/bin/ldflags)
-go test -ldflags "$GO_LDFLAGS" -tags test,integration $TEST_FLAGS $1
+go test -ldflags "$GO_LDFLAGS" -tags test $TEST_FLAGS $1
